@@ -315,8 +315,17 @@ const unsigned char giraffe1_bitmap_giraffe1 [] PROGMEM = {
 	0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00
 };
 
-// Array of all bitmaps for convenience. (Total bytes used to store images in PROGMEM = 5024)
-const int giraffe1_bitmap_allArray_LEN = 1;
-const unsigned char* giraffe1_bitmap_allArray[1] = {
-	giraffe1_bitmap_giraffe1
+struct WatchFace_giraffe1 : public WatchFace {
+  WatchFace_giraffe1() {
+    bitmap = giraffe1_bitmap_giraffe1;
+		layout = 1;
+
+		text1x = 210;
+    text1y = 110;
+    text1font = &Helloworld_ovvY020pt7b;
+
+		text2x = 310;
+    text2y = 130;
+		text2font = &Helloworld_ovvY020pt7b;
+  }
 };

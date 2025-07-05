@@ -315,8 +315,14 @@ const unsigned char b1_bitmap_b1_droid [] PROGMEM = {
 	0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00
 };
 
-// Array of all bitmaps for convenience. (Total bytes used to store images in PROGMEM = 5024)
-const int b1_bitmap_allArray_LEN = 1;
-const unsigned char* b1_bitmap_allArray[1] = {
-	b1_bitmap_b1_droid
+struct WatchFace_b1 : public WatchFace {
+  WatchFace_b1() {
+    bitmap = b1_bitmap_b1_droid;
+    
+		text1x = -1;
+    text1y = 90;
+		text1font = &StarJedi_DGRW10pt7b;
+		
+		text2font = &StarJedi_DGRW10pt7b;
+  }
 };

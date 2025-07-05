@@ -315,8 +315,17 @@ const unsigned char atdp_bitmap_at_dp [] PROGMEM = {
 	0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00
 };
 
-// Array of all bitmaps for convenience. (Total bytes used to store images in PROGMEM = 5024)
-const int atat_bitmap_allArray_LEN = 1;
-const unsigned char* atdp_bitmap_allArray[1] = {
-	atdp_bitmap_at_dp
+struct WatchFace_atdp : public WatchFace {
+  WatchFace_atdp() {
+    bitmap = atdp_bitmap_at_dp;
+		layout = 1;
+
+		text1x = -1;
+    text1y = 70;
+    text1font = &StarJedi_DGRW20pt7b;
+
+		text2x = 8;
+    text2y = 90;
+		text2font = &StarJedi_DGRW10pt7b;
+  }
 };
