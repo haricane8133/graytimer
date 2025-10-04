@@ -9,12 +9,15 @@ void setup() {
 
   // new WatchFace_atat()
   // new WatchFace_atdp()
-  // new WatchFace_stormtrooper3floyd()
-  // new WatchFace_stormtrooper3()
   // new WatchFace_b1()
+  // new WatchFace_bird()
+  // new WatchFace_bird2()
+  // new WatchFace_bugs()
   // new WatchFace_giraffe1()
   // new WatchFace_mountain2()
-  drawWatchFace(new WatchFace_mountain2(), "6:24 AM", "Jun 24");
+  // new WatchFace_stormtrooper3floyd()
+  // new WatchFace_stormtrooper3()
+  drawWatchFace(new WatchFace_bugs(), "6:24 AM", "Jun 24");
 
   // Sleep to preserve battery
   display.hibernate();

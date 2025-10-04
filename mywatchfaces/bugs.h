@@ -315,8 +315,18 @@ const unsigned char bugs_bitmap_bugs [] PROGMEM = {
 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00
 };
 
-// Array of all bitmaps for convenience. (Total bytes used to store images in PROGMEM = 5024)
-const int bugs_bitmap_allArray_LEN = 1;
-const unsigned char* bugs_bitmap_allArray[1] = {
-	bugs_bitmap_bugs
+struct WatchFace_bugs : public WatchFace {
+  WatchFace_bugs() {
+    bitmap = bugs_bitmap_bugs;
+		layout = 1;
+		noAMPM = true;
+
+		text1x = 50;
+    text1y = 35;
+    text1font = &DynaPuff_VariableFont_wdth_wght20pt7b;
+
+		text2x = 50;
+    text2y = 65;
+		text2font = &DynaPuff_VariableFont_wdth_wght10pt7b;
+  }
 };

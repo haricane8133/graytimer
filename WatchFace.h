@@ -8,6 +8,7 @@ struct WatchFace {
   uint16_t bitmap_color = GxEPD_BLACK;
 
   int layout = 0; // 0 - text1 and text 2 are in single line ; 1 - text1 and text 2 are in multiple lines
+  bool noAMPM = false;
 
   int text1x = -1; // -1 to center text 1 along x axis; else start text at a percentage of total x axis screen length
   int text1y = -1; // -1 to center text 1 along y axis; else start text at a percentage of total y axis screen length

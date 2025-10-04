@@ -20,15 +20,21 @@
 #include "myfonts/StarJedi_DGRW10pt7b.h"
 #include "myfonts/StarJedi_DGRW20pt7b.h"
 #include "myfonts/DynaPuff_VariableFont_wdth_wght10pt7b.h"
+#include "myfonts/DynaPuff_VariableFont_wdth_wght20pt7b.h"
 #include "myfonts/Helloworld_ovvY020pt7b.h"
 #include "myfonts/BekingBold_1Gqdg20pt7b.h"
 #include "myfonts/BekingBold_1Gqdg10pt7b.h"
+#include "myfonts/OctoberTwilight_Ooe610pt7b.h"
+#include "myfonts/OctoberTwilight_Ooe615pt7b.h"
 
 
 // include all watchfaces used, here
 #include "mywatchfaces/atat.h"
 #include "mywatchfaces/atdp.h"
 #include "mywatchfaces/b1.h"
+#include "mywatchfaces/bird.h"
+#include "mywatchfaces/bird2.h"
+#include "mywatchfaces/bugs.h"
 #include "mywatchfaces/giraffe1.h"
 #include "mywatchfaces/mountain2.h"
 #include "mywatchfaces/stormtrooper3_floyd.h"
@@ -39,6 +45,6 @@ extern GxEPD2_BW<GxEPD2_154_D67, GxEPD2_154_D67::HEIGHT> display;
 
 void drawWatchFace(
   const WatchFace* face,
-  const String& text1,  // time
-  const String& text2   // date
+  String text1,  // time
+  String text2   // date
 );

@@ -6,8 +6,8 @@ GxEPD2_BW<GxEPD2_154_D67, GxEPD2_154_D67::HEIGHT> display(
 
 void drawWatchFace(
   const WatchFace* face,
-  const String& text1,
-  const String& text2
+  String text1,
+  String text2
 ) {
   const int screenW = 200;
   const int screenH = 200;
@@ -25,6 +25,11 @@ void drawWatchFace(
       face->bitmap_y_end,
       face->bitmap_color
     );
+
+    if(face->noAMPM) {
+      // Assuming 6 characters are taken for time without AM / PM
+      text1 = text1.substring(0, 5);
+    }
 
     // --- Get Text Bounds ---
     display.setFont(face->text1font);

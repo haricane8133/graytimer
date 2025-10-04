@@ -315,8 +315,17 @@ const unsigned char bird2_bitmap_bird2 [] PROGMEM = {
 	0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00
 };
 
-// Array of all bitmaps for convenience. (Total bytes used to store images in PROGMEM = 5024)
-const int bird2_bitmap_allArray_LEN = 1;
-const unsigned char* bird2_bitmap_allArray[1] = {
-	bird2_bitmap_bird2
+struct WatchFace_bird2 : public WatchFace {
+  WatchFace_bird2() {
+    bitmap = bird2_bitmap_bird2;
+		layout = 1;
+
+		text1x = 5;
+    text1y = 5;
+    text1font = &OctoberTwilight_Ooe615pt7b;
+
+		text2x = 5;
+    text2y = 87;
+		text2font = &OctoberTwilight_Ooe610pt7b;
+  }
 };
