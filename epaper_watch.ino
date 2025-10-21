@@ -2,12 +2,16 @@
 
 // ==================== CONFIGURATION ====================
 const bool ENABLE_TIME_SETUP = true;  // Enable serial time input on boot
+const bool ENABLE_PARTIAL_REFRESH = true;  // Enable partial refresh for faster updates
+const uint8_t FULL_REFRESH_INTERVAL = 10;  // Full refresh when minute % N == 0 (e.g., :00, :10, :20, etc.)
 
 // Global RTC manager
 RTCManager rtcManager;
 
 // Track last displayed minute to detect changes
 uint8_t lastDisplayedMinute = 255;  // Force first update
+bool displayInitialized = false;  // Track if display has been initialized
+bool firstUpdate = true;  // Track first update to force full refresh
 
 // new WatchFace_atat()
 // new WatchFace_atdp()
@@ -29,10 +33,6 @@ void setup() {
   delay(1000);
 
   Serial.println("\n=== E-Paper Watch - Simple RTC Version ===");
-
-  // Initialize display
-  display.init(115200, true, 2, false);
-  display.setRotation(0);
 
   // Initialize RTC
   if (!rtcManager.begin()) {
@@ -87,24 +87,41 @@ void loop() {
  * Update e-paper display with current time from RTC
  */
 void updateDisplay() {
+  // Initialize display ONLY ONCE on first call
+  if (!displayInitialized) {
+    display.init(115200, true, 2, false);
+    display.setRotation(0);
+    displayInitialized = true;
+  }
+
   // Get formatted time and date from RTC
   String timeStr = rtcManager.getFormattedTime(!currentWatchFace->noAMPM);
   String dateStr = rtcManager.getFormattedDate();
+  uint8_t currentMinute = rtcManager.getCurrentMinute();
 
-  Serial.print("Updating display - Time: ");
-  Serial.print(timeStr);
-  Serial.print(", Date: ");
-  Serial.println(dateStr);
+  // Determine refresh mode
+  // FULL refresh: First update OR every 10 minutes (for ghosting prevention)
+  // PARTIAL refresh: All other times (faster, no flicker)
+  bool usePartialRefresh = ENABLE_PARTIAL_REFRESH &&
+                          !firstUpdate &&
+                          (currentMinute % FULL_REFRESH_INTERVAL != 0);
+
+  if (firstUpdate) {
+    firstUpdate = false;
+  }
 
   unsigned long startTime = millis();
 
   // Draw watchface
-  drawWatchFace(currentWatchFace, timeStr, dateStr);
+  drawWatchFace(currentWatchFace, timeStr, dateStr, usePartialRefresh);
 
   unsigned long elapsed = millis() - startTime;
-  Serial.print("Display updated in ");
+  Serial.print(timeStr);
+  Serial.print(" (");
+  Serial.print(usePartialRefresh ? "partial" : "full");
+  Serial.print(", ");
   Serial.print(elapsed);
-  Serial.println(" ms\n");
+  Serial.println("ms)");
 
   // Put display in low-power mode
   display.hibernate();

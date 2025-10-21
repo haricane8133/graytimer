@@ -318,14 +318,14 @@ const unsigned char giraffe1_bitmap_giraffe1 [] PROGMEM = {
 struct WatchFace_giraffe1 : public WatchFace {
   WatchFace_giraffe1() {
     bitmap = giraffe1_bitmap_giraffe1;
-		layout = 1;
+	layout = 1;
 
-		text1x = 210;
-    text1y = 110;
+	text1x = 50;
+    text1y = 90;
     text1font = &Helloworld_ovvY020pt7b;
 
-		text2x = 310;
-    text2y = 130;
-		text2font = &Helloworld_ovvY020pt7b;
+	text2x = 0;
+    text2y = 90;
+	text2font = &Helloworld_ovvY020pt7b;
   }
 };

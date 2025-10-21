@@ -58,5 +58,6 @@ extern GxEPD2_BW<GxEPD2_154_D67, GxEPD2_154_D67::HEIGHT> display;
 void drawWatchFace(
   const WatchFace* face,
   String text1,  // time
-  String text2   // date
+  String text2,  // date
+  bool partialRefresh
 );

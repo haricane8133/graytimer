@@ -7,7 +7,8 @@ GxEPD2_BW<GxEPD2_154_D67, GxEPD2_154_D67::HEIGHT> display(
 void drawWatchFace(
   const WatchFace* face,
   String text1,
-  String text2
+  String text2,
+  bool partialRefresh
 ) {
   const int screenW = 200;
   const int screenH = 200;
@@ -16,7 +17,7 @@ void drawWatchFace(
     text1 = text1.substring(0, 5);
   }
 
-  // --- Get Text Bounds ---
+  // Get text bounds for positioning
   display.setFont(face->text1font);
   int16_t x1, y1;
   uint16_t w1, h1;
@@ -41,7 +42,7 @@ void drawWatchFace(
 
     baselineY = (face->text1y < 0)
       ? (screenH - totalH) / 2
-      : (int)(screenW * (face->text1y / 100.0));
+      : (int)(screenH * (face->text1y / 100.0));
   } else {
     // Two-line layout
     drawX1 = (face->text1x < 0)
@@ -61,15 +62,23 @@ void drawWatchFace(
       : (int)(screenH * (face->text2y / 100.0)) - y2;
   }
 
-  // Full window refresh
-  display.setFullWindow();
+  // Set refresh window mode
+  // Partial refresh: Fast update (~5-10s), refresh entire screen
+  // Full refresh: Slow update (~20s), prevents ghosting
+  // Note: Even in partial mode we refresh full screen - no ghosting since bitmap doesn't change!
+  if (partialRefresh) {
+    display.setPartialWindow(0, 0, screenW, screenH);
+  } else {
+    display.setFullWindow();
+  }
 
-  // Draw content
+  // Draw everything
   display.firstPage();
   do {
-    // Clear and redraw everything
+    // Always draw full screen
     display.fillScreen(GxEPD_WHITE);
 
+    // Draw bitmap
     display.drawBitmap(
       face->bitmap_x_start,
       face->bitmap_y_start,
@@ -81,6 +90,7 @@ void drawWatchFace(
 
     // Draw text
     if (face->layout == 0) {
+      // Single-line layout
       display.setFont(face->text1font);
       display.setTextColor(face->text1color);
       display.setCursor(originX - x1, baselineY - y1);
@@ -91,6 +101,7 @@ void drawWatchFace(
       display.setCursor(originX + w1 + 6 - x2, baselineY - y2);
       display.print(text2);
     } else {
+      // Two-line layout
       display.setFont(face->text1font);
       display.setTextColor(face->text1color);
       display.setCursor(drawX1, drawY1);
