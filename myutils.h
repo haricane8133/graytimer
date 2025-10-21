@@ -1,18 +1,30 @@
 #pragma once
 #include <SPI.h>
+#include <Wire.h>
 #include <GxEPD2_BW.h>
 #include <Adafruit_GFX.h>
+#include <RTClib.h>
 #include "bitmaps/Bitmaps200x200.h"
 
-// Pin definitions for Xiao ESP32-S3
-#define EPD_CS    D1
-#define EPD_DC    D3
-#define EPD_RST   D0
-#define EPD_BUSY  D5
-#define EPD_SCK   D8
-#define EPD_MOSI  D10
+// E-Paper Display Pin Definitions (GoodDisplay 1.54" - GDEH0154D67)
+#define EPD_MOSI  D10  // SPI MOSI (DAT) - Hardware SPI
+#define EPD_SCK   D8   // SPI Clock (CLK) - Hardware SPI
+#define EPD_CS    D1   // Chip Select (CS) - GPIO
+#define EPD_DC    D3   // Data/Command (DC) - GPIO
+#define EPD_RST   D0   // Reset (RES) - GPIO
+#define EPD_BUSY  D6   // Busy Signal (BUSY) - GPIO (was D5 in breakout board, moved to free I2C)
+
+// RTC (DS3231) Pin Definitions
+// Using default hardware I2C pins (no Wire.begin(SDA,SCL) needed)
+#define RTC_SDA           D4   // I2C SDA (Hardware I2C)
+#define RTC_SCL           D5   // I2C SCL (Hardware I2C)
+#define RTC_INTERRUPT_PIN D2   // SQW/INT alarm interrupt - GPIO
+
+// Future: Button for time sync / menu navigation
+#define BUTTON_PIN        D7   // User input (with internal pull-up) - GPIO
 
 #include "WatchFace.h"
+#include "RTCManager.h"
 
 // include all fonts used, here
 #include <Fonts/FreeMonoBold9pt7b.h>

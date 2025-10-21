@@ -1,3 +1,6 @@
+#ifndef WATCHFACE_H
+#define WATCHFACE_H
+
 struct WatchFace {
   const unsigned char* bitmap;
 
@@ -20,3 +23,5 @@ struct WatchFace {
   uint16_t text2color = GxEPD_BLACK;
   const GFXfont* text2font;
 };
+
+#endif // WATCHFACE_H
