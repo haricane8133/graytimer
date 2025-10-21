@@ -12,8 +12,10 @@
  * - Set initial time (for configuration)
  */
 class RTCManager {
+public:
+  RTC_DS3231 rtc;  // Public for accessing DateTime
+
 private:
-  RTC_DS3231 rtc;
   bool initialized;
 
   const char* monthNames[12] = {
@@ -49,48 +51,6 @@ public:
     return true;
   }
 
-  /**
-   * Configure DS3231 to trigger alarm every minute at :00 seconds
-   * This enables interrupt-driven wake-up
-   */
-  bool configureMinuteAlarm() {
-    if (!initialized) return false;
-
-    // Disable both alarms first
-    rtc.disableAlarm(1);
-    rtc.disableAlarm(2);
-
-    // Clear any pending alarm flags
-    rtc.clearAlarm(1);
-    rtc.clearAlarm(2);
-
-    // Set Alarm 1 to trigger at the start of every minute (:00 seconds)
-    // DS3231_A1_Minute mode: Alarm when seconds=0, ignores minute/hour/day
-    DateTime now = rtc.now();
-    rtc.setAlarm1(DateTime(2000, 1, 1, 0, 0, 0), DS3231_A1_Minute);
-
-    // Enable interrupt output on SQW/INT pin
-    rtc.writeSqwPinMode(DS3231_OFF);  // Disable square wave, enable alarm interrupts
-
-    Serial.println("RTC alarm configured for minute-based wake-up");
-    return true;
-  }
-
-  /**
-   * Clear the alarm flag (must be called after wake-up)
-   */
-  void clearAlarmFlag() {
-    if (!initialized) return;
-    rtc.clearAlarm(1);
-  }
-
-  /**
-   * Check if alarm has fired
-   */
-  bool alarmFired() {
-    if (!initialized) return false;
-    return rtc.alarmFired(1);
-  }
 
   /**
    * Get current time formatted as "H:MM AM/PM" (e.g., "6:24 AM")
