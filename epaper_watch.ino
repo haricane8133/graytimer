@@ -4,6 +4,7 @@
 const bool ENABLE_TIME_SETUP = true;  // Enable serial time input on boot
 const bool ENABLE_PARTIAL_REFRESH = true;  // Enable partial refresh for faster updates
 const uint8_t FULL_REFRESH_INTERVAL = 10;  // Full refresh when minute % N == 0 (e.g., :00, :10, :20, etc.)
+const bool ENABLE_WATCHFACE_CYCLING = true;  // Auto-cycle through watchfaces every 10 mins
 
 // Smart polling strategy for battery optimization
 const uint16_t POLL_INTERVAL_MS = 200;      // Poll every 200ms during active window
@@ -19,11 +20,21 @@ uint8_t lastDisplayedMinute = 255;  // Force first update
 bool displayInitialized = false;  // Track if display has been initialized
 bool firstUpdate = true;  // Track first update to force full refresh
 
-// Available watchfaces:
-// WatchFace_atat, WatchFace_atdp, WatchFace_b1, WatchFace_bird, WatchFace_bird2
-// WatchFace_bugs, WatchFace_giraffe1, WatchFace_mountain2
-// WatchFace_stormtrooper3_floyd, WatchFace_stormtrooper3
-WatchFace* currentWatchFace = new WatchFace_mountain2();
+// Watchface cycling - array of all available watchfaces
+WatchFace* allWatchFaces[] = {
+  new WatchFace_atat(),
+  new WatchFace_atdp(),
+  new WatchFace_b1(),
+  new WatchFace_bird(),
+  new WatchFace_bird2(),
+  new WatchFace_bugs(),
+  new WatchFace_giraffe1(),
+  new WatchFace_mountain2(),
+  new WatchFace_stormtrooper3floyd()
+};
+const uint8_t NUM_WATCHFACES = sizeof(allWatchFaces) / sizeof(allWatchFaces[0]);
+uint8_t currentWatchFaceIndex = 0;
+WatchFace* currentWatchFace = allWatchFaces[currentWatchFaceIndex];
 
 /**
  * Setup - runs once on power-on
@@ -137,12 +148,26 @@ void updateDisplay() {
   String dateStr = rtcManager.getFormattedDate();
   uint8_t currentMinute = rtcManager.getCurrentMinute();
 
+  // Check if it's time for full refresh (every 10 mins: :00, :10, :20, etc.)
+  bool isFullRefreshTime = (currentMinute % FULL_REFRESH_INTERVAL == 0);
+
+  // Cycle to next watchface if enabled and it's full refresh time
+  if (ENABLE_WATCHFACE_CYCLING && isFullRefreshTime && !firstUpdate) {
+    currentWatchFaceIndex = (currentWatchFaceIndex + 1) % NUM_WATCHFACES;
+    currentWatchFace = allWatchFaces[currentWatchFaceIndex];
+    Serial.print("Cycling to watchface #");
+    Serial.print(currentWatchFaceIndex);
+    Serial.print(" (");
+    Serial.print(NUM_WATCHFACES);
+    Serial.println(" total)");
+  }
+
   // Determine refresh mode
   // FULL refresh: First update OR every 10 minutes (for ghosting prevention)
   // PARTIAL refresh: All other times (faster, no flicker)
   bool usePartialRefresh = ENABLE_PARTIAL_REFRESH &&
                           !firstUpdate &&
-                          (currentMinute % FULL_REFRESH_INTERVAL != 0);
+                          !isFullRefreshTime;
 
   if (firstUpdate) {
     firstUpdate = false;
