@@ -316,7 +316,22 @@ const unsigned char walker_bitmap_walker [] PROGMEM = {
 };
 
 // Array of all bitmaps for convenience. (Total bytes used to store images in PROGMEM = 5024)
-const int walker_bitmap_allArray_LEN = 1;
-const unsigned char* walker_bitmap_allArray[1] = {
+static const int walker_bitmap_allArray_LEN = 1;
+static const unsigned char* walker_bitmap_allArray[1] = {
 	walker_bitmap_walker
+};
+
+struct WatchFace_walker : public WatchFace {
+  WatchFace_walker() {
+    bitmap = walker_bitmap_walker;
+	layout = 1;
+    
+	text1x = 2;
+    text1y = 5;
+	text1font = &ToughCookiesBold_owZ1d20pt7b;
+
+	text2x = 40;
+    text2y = 20;
+	text2font = &ToughCookiesBold_owZ1d20pt7b;
+  }
 };

@@ -316,7 +316,23 @@ const unsigned char H_bitmap_COVER_IMAGE6724912876317373831 [] PROGMEM = {
 };
 
 // Array of all bitmaps for convenience. (Total bytes used to store images in PROGMEM = 5024)
-const int H_bitmap_allArray_LEN = 1;
-const unsigned char* H_bitmap_allArray[1] = {
+static const int H_bitmap_allArray_LEN = 1;
+static const unsigned char* H_bitmap_allArray[1] = {
 	H_bitmap_COVER_IMAGE6724912876317373831
+};
+
+struct WatchFace_h : public WatchFace {
+  WatchFace_h() {
+    bitmap = H_bitmap_COVER_IMAGE6724912876317373831;
+	layout = 1;
+	noAMPM = true;
+
+	text1x = 65;
+    text1y = 85;
+    text1font = &CourierPrime_Bold10pt7b;
+
+	text2x = 60;
+    text2y = 90;
+	text2font = &CourierPrime_Bold10pt7b;
+  }
 };

@@ -316,7 +316,23 @@ const unsigned char zebra_bitmap_zebra1 [] PROGMEM = {
 };
 
 // Array of all bitmaps for convenience. (Total bytes used to store images in PROGMEM = 5024)
-const int zebra_bitmap_allArray_LEN = 1;
-const unsigned char* zebra_bitmap_allArray[1] = {
+static const int zebra_bitmap_allArray_LEN = 1;
+static const unsigned char* zebra_bitmap_allArray[1] = {
 	zebra_bitmap_zebra1
+};
+
+struct WatchFace_zebra : public WatchFace {
+  WatchFace_zebra() {
+    bitmap = zebra_bitmap_zebra1;
+	layout = 1;
+	noAMPM = true;
+
+	text1x = 57;
+    text1y = 40;
+    text1font = &ToughCookiesBold_owZ1d20pt7b;
+
+	text2x = 60;
+    text2y = 60;
+	text2font = &ToughCookiesBold_owZ1d10pt7b;
+  }
 };

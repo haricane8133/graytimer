@@ -321,12 +321,12 @@ struct WatchFace_bugs : public WatchFace {
 		layout = 1;
 		noAMPM = true;
 
-		text1x = 50;
-    text1y = 35;
+		text1x = 52;
+    text1y = 40;
     text1font = &DynaPuff_VariableFont_wdth_wght20pt7b;
 
-		text2x = 50;
-    text2y = 65;
+		text2x = 58;
+    text2y = 60;
 		text2font = &DynaPuff_VariableFont_wdth_wght10pt7b;
   }
 };

@@ -316,7 +316,23 @@ const unsigned char tom_bitmap_tom [] PROGMEM = {
 };
 
 // Array of all bitmaps for convenience. (Total bytes used to store images in PROGMEM = 5024)
-const int tom_bitmap_allArray_LEN = 1;
-const unsigned char* tom_bitmap_allArray[1] = {
+static const int tom_bitmap_allArray_LEN = 1;
+static const unsigned char* tom_bitmap_allArray[1] = {
 	tom_bitmap_tom
+};
+
+struct WatchFace_tom : public WatchFace {
+  WatchFace_tom() {
+    bitmap = tom_bitmap_tom;
+	layout = 1;
+	noAMPM = true;
+
+	text1x = 52;
+    text1y = 40;
+    text1font = &DynaPuff_VariableFont_wdth_wght20pt7b;
+
+	text2x = 58;
+    text2y = 60;
+	text2font = &DynaPuff_VariableFont_wdth_wght10pt7b;
+  }
 };

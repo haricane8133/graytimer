@@ -319,12 +319,12 @@ struct WatchFace_stormtrooper3floyd : public WatchFace {
   WatchFace_stormtrooper3floyd() {
     bitmap = stormtrooper3floyd_bitmap_stormtrooper3;
     
-		text1x = -1;
+	text1x = -1;
     text1y = 90;
-		text1font = &StarJedi_DGRW10pt7b;
-		text1color = GxEPD_WHITE;
+	text1font = &StarJedi_DGRW10pt7b;
+	text1color = GxEPD_WHITE;
 
-		text2font = &StarJedi_DGRW10pt7b;
-		text2color = GxEPD_WHITE;
+	text2font = &StarJedi_DGRW10pt7b;
+	text2color = GxEPD_WHITE;
   }
 };

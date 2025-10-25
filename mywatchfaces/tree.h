@@ -316,7 +316,22 @@ const unsigned char tree_bitmap_tree [] PROGMEM = {
 };
 
 // Array of all bitmaps for convenience. (Total bytes used to store images in PROGMEM = 5024)
-const int tree_bitmap_allArray_LEN = 1;
-const unsigned char* tree_bitmap_allArray[1] = {
+static const int tree_bitmap_allArray_LEN = 1;
+static const unsigned char* tree_bitmap_allArray[1] = {
 	tree_bitmap_tree
+};
+
+struct WatchFace_tree : public WatchFace {
+  WatchFace_tree() {
+    bitmap = tree_bitmap_tree;
+	layout = 1;
+    
+	text1x = -1;
+    text1y = 78;
+	text1font = &Neuton_Bold20pt7b;
+
+	text2x = -1;
+    text2y = 92;
+	text2font = &Neuton_Bold10pt7b;
+  }
 };

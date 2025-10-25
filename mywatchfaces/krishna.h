@@ -316,7 +316,23 @@ const unsigned char krishna_bitmap_peacock2 [] PROGMEM = {
 };
 
 // Array of all bitmaps for convenience. (Total bytes used to store images in PROGMEM = 5024)
-const int krishna_bitmap_allArray_LEN = 1;
-const unsigned char* krishna_bitmap_allArray[1] = {
+static const int krishna_bitmap_allArray_LEN = 1;
+static const unsigned char* krishna_bitmap_allArray[1] = {
 	krishna_bitmap_peacock2
+};
+
+struct WatchFace_krishna : public WatchFace {
+  WatchFace_krishna() {
+    bitmap = krishna_bitmap_peacock2;
+	layout = 1;
+	noAMPM = true;
+
+	text1x = 7;
+    text1y = 40;
+    text1font = &Caveat_VariableFont_wght20pt7b;
+
+	text2x = 5;
+    text2y = 53;
+	text2font = &Caveat_VariableFont_wght20pt7b;
+  }
 };

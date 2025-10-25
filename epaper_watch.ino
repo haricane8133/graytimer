@@ -35,9 +35,26 @@ WatchFace* allWatchFaces[] = {
   new WatchFace_bird(),
   new WatchFace_bird2(),
   new WatchFace_bugs(),
+  new WatchFace_crow(),
+  new WatchFace_dog(),
   new WatchFace_giraffe1(),
+  new WatchFace_h(),
+  new WatchFace_krishna(),
+  new WatchFace_macaw(),
+  new WatchFace_mountain1(),
   new WatchFace_mountain2(),
-  new WatchFace_stormtrooper3floyd()
+  new WatchFace_peacock(),
+  new WatchFace_peacock3(),
+  new WatchFace_pegasus(),
+  new WatchFace_square(),
+  new WatchFace_square_invert(),
+  new WatchFace_stormtrooper2(),
+  new WatchFace_stormtrooper3floyd(),
+  new WatchFace_tom(),
+  new WatchFace_tree(),
+  new WatchFace_walker(),
+  new WatchFace_xwing(),
+  new WatchFace_zebra()
 };
 const uint8_t NUM_WATCHFACES = sizeof(allWatchFaces) / sizeof(allWatchFaces[0]);
 uint8_t currentWatchFaceIndex = 0;

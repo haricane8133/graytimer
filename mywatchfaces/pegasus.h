@@ -316,7 +316,19 @@ const unsigned char pegasus_bitmap_pegasus [] PROGMEM = {
 };
 
 // Array of all bitmaps for convenience. (Total bytes used to store images in PROGMEM = 5024)
-const int pegasus_bitmap_allArray_LEN = 1;
-const unsigned char* pegasus_bitmap_allArray[1] = {
+static const int pegasus_bitmap_allArray_LEN = 1;
+static const unsigned char* pegasus_bitmap_allArray[1] = {
 	pegasus_bitmap_pegasus
+};
+
+
+struct WatchFace_pegasus : public WatchFace {
+  WatchFace_pegasus() {
+    bitmap = pegasus_bitmap_pegasus;
+
+	text1x = -1;
+    text1y = 85;
+	text1font = &Beyblade_Metal_Fight_Font10pt7b;
+	text2font = &Beyblade_Metal_Fight_Font10pt7b;
+  }
 };

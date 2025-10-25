@@ -316,7 +316,23 @@ const unsigned char macaw_bitmap_macaw [] PROGMEM = {
 };
 
 // Array of all bitmaps for convenience. (Total bytes used to store images in PROGMEM = 5024)
-const int macaw_bitmap_allArray_LEN = 1;
-const unsigned char* macaw_bitmap_allArray[1] = {
+static const int macaw_bitmap_allArray_LEN = 1;
+static const unsigned char* macaw_bitmap_allArray[1] = {
 	macaw_bitmap_macaw
+};
+
+struct WatchFace_macaw : public WatchFace {
+  WatchFace_macaw() {
+    bitmap = macaw_bitmap_macaw;
+	layout = 1;
+	noAMPM = true;
+
+	text1x = 7;
+    text1y = 40;
+    text1font = &ToughCookiesBold_owZ1d20pt7b;
+
+	text2x = 5;
+    text2y = 53;
+	text2font = &ToughCookiesBold_owZ1d20pt7b;
+  }
 };

@@ -316,7 +316,19 @@ const unsigned char stormtrooper2_bitmap_stormtrooper2 [] PROGMEM = {
 };
 
 // Array of all bitmaps for convenience. (Total bytes used to store images in PROGMEM = 5024)
-const int stormtrooper2_bitmap_allArray_LEN = 1;
-const unsigned char* stormtrooper2_bitmap_allArray[1] = {
+static const int stormtrooper2_bitmap_allArray_LEN = 1;
+static const unsigned char* stormtrooper2_bitmap_allArray[1] = {
 	stormtrooper2_bitmap_stormtrooper2
+};
+
+struct WatchFace_stormtrooper2 : public WatchFace {
+  WatchFace_stormtrooper2() {
+    bitmap = stormtrooper2_bitmap_stormtrooper2;
+    
+	text1x = -1;
+    text1y = 85;
+	text1font = &StarJedi_DGRW10pt7b;
+
+	text2font = &StarJedi_DGRW10pt7b;
+  }
 };

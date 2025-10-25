@@ -1,5 +1,5 @@
-// 'crow', 200x200px
-const unsigned char square_invert_bitmap_crow [] PROGMEM = {
+// 'square_invert', 200x200px
+const unsigned char square_invert_bitmap_square_invert [] PROGMEM = {
 	0xff, 0xff, 0xfe, 0x00, 0x00, 0x00, 0xff, 0xff, 0xff, 0x00, 0x00, 0x00, 0x7f, 0xff, 0xff, 0x00, 
 0x00, 0x00, 0x7f, 0xff, 0xff, 0x80, 0x00, 0x00, 0x3f, 0x0f, 0xff, 0xfe, 0x00, 0x00, 0x00, 0x00, 
 0x0f, 0xfe, 0x00, 0x00, 0x00, 0x00, 0x0f, 0xff, 0x00, 0x00, 0x00, 0x7f, 0xff, 0xff, 0x80, 0x00, 
@@ -316,7 +316,23 @@ const unsigned char square_invert_bitmap_crow [] PROGMEM = {
 };
 
 // Array of all bitmaps for convenience. (Total bytes used to store images in PROGMEM = 5024)
-const int square_invert_bitmap_allArray_LEN = 1;
-const unsigned char* square_invert_bitmap_allArray[1] = {
-	square_invert_bitmap_crow
+static const int square_invert_bitmap_allArray_LEN = 1;
+static const unsigned char* square_invert_bitmap_allArray[1] = {
+	square_invert_bitmap_square_invert
+};
+
+
+struct WatchFace_square_invert : public WatchFace {
+  WatchFace_square_invert() {
+    bitmap = square_invert_bitmap_square_invert;
+	layout = 1;
+
+	text1x = -1;
+    text1y = 30;
+	text1font = &Helloworld_ovvY040pt7b;
+
+	text2x = -1;
+    text2y = 60;
+	text2font = &Helloworld_ovvY040pt7b;
+  }
 };

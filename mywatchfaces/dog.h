@@ -316,7 +316,22 @@ const unsigned char dog_bitmap_dog [] PROGMEM = {
 };
 
 // Array of all bitmaps for convenience. (Total bytes used to store images in PROGMEM = 5024)
-const int dog_bitmap_allArray_LEN = 1;
-const unsigned char* dog_bitmap_allArray[1] = {
+static const int dog_bitmap_allArray_LEN = 1;
+static const unsigned char* dog_bitmap_allArray[1] = {
 	dog_bitmap_dog
+};
+
+struct WatchFace_dog : public WatchFace {
+  WatchFace_dog() {
+    bitmap = dog_bitmap_dog;
+	layout = 1;
+
+	text1x = -1;
+    text1y = 2;
+    text1font = &DynaPuff_VariableFont_wdth_wght20pt7b;
+
+	text2x = -1;
+    text2y = 20;
+	text2font = &DynaPuff_VariableFont_wdth_wght10pt7b;
+  }
 };

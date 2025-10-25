@@ -1,5 +1,5 @@
-// 'crow', 200x200px
-const unsigned char square_bitmap_crow [] PROGMEM = {
+// 'square', 200x200px
+const unsigned char square_bitmap_square [] PROGMEM = {
 	0x00, 0x00, 0x01, 0xff, 0xff, 0xff, 0x00, 0x00, 0x00, 0xff, 0xff, 0xff, 0x80, 0x00, 0x00, 0xff, 
 	0xff, 0xff, 0x80, 0x00, 0x00, 0x7f, 0xff, 0xff, 0xc0, 0xf0, 0x00, 0x01, 0xff, 0xff, 0xff, 0xff, 
 	0xf0, 0x01, 0xff, 0xff, 0xff, 0xff, 0xf0, 0x00, 0xff, 0xff, 0xff, 0x80, 0x00, 0x00, 0x7f, 0xff, 
@@ -316,7 +316,24 @@ const unsigned char square_bitmap_crow [] PROGMEM = {
 };
 
 // Array of all bitmaps for convenience. (Total bytes used to store images in PROGMEM = 5024)
-const int square_bitmap_allArray_LEN = 1;
-const unsigned char* square_bitmap_allArray[1] = {
-	square_bitmap_crow
+static const int square_bitmap_allArray_LEN = 1;
+static const unsigned char* square_bitmap_allArray[1] = {
+	square_bitmap_square
+};
+
+struct WatchFace_square : public WatchFace {
+  WatchFace_square() {
+    bitmap = square_bitmap_square;
+	layout = 1;
+
+	text1x = -1;
+    text1y = 30;
+	text1font = &Helloworld_ovvY040pt7b;
+	text1color = GxEPD_WHITE;
+
+	text2x = -1;
+    text2y = 60;
+	text2font = &Helloworld_ovvY040pt7b;
+	text2color = GxEPD_WHITE;
+  }
 };

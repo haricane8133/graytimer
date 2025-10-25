@@ -316,7 +316,22 @@ const unsigned char xwing_bitmap_xwing [] PROGMEM = {
 };
 
 // Array of all bitmaps for convenience. (Total bytes used to store images in PROGMEM = 5024)
-const int xwing_bitmap_allArray_LEN = 1;
-const unsigned char* xwing_bitmap_allArray[1] = {
+static const int xwing_bitmap_allArray_LEN = 1;
+static const unsigned char* xwing_bitmap_allArray[1] = {
 	xwing_bitmap_xwing
+};
+
+struct WatchFace_xwing : public WatchFace {
+  WatchFace_xwing() {
+    bitmap = xwing_bitmap_xwing;
+	layout = 1;
+    
+	text1x = -1;
+    text1y = 60;
+	text1font = &StarJedi_DGRW20pt7b;
+
+	text2x = -1;
+    text2y = 80;
+	text2font = &StarJedi_DGRW10pt7b;
+  }
 };

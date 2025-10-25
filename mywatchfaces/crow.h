@@ -316,7 +316,22 @@ const unsigned char crow_bitmap_crow [] PROGMEM = {
 };
 
 // Array of all bitmaps for convenience. (Total bytes used to store images in PROGMEM = 5024)
-const int crow_bitmap_allArray_LEN = 1;
-const unsigned char* crow_bitmap_allArray[1] = {
+static const int crow_bitmap_allArray_LEN = 1;
+static const unsigned char* crow_bitmap_allArray[1] = {
 	crow_bitmap_crow
+};
+
+struct WatchFace_crow : public WatchFace {
+  WatchFace_crow() {
+    bitmap = crow_bitmap_crow;
+		layout = 1;
+
+		text1x = -1;
+    text1y = 2;
+    text1font = &DynaPuff_VariableFont_wdth_wght20pt7b;
+
+		text2x = -1;
+    text2y = 20;
+		text2font = &DynaPuff_VariableFont_wdth_wght10pt7b;
+  }
 };

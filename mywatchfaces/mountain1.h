@@ -316,7 +316,22 @@ const unsigned char mountain1_bitmap_mountain [] PROGMEM = {
 };
 
 // Array of all bitmaps for convenience. (Total bytes used to store images in PROGMEM = 5024)
-const int mountain1_bitmap_allArray_LEN = 1;
-const unsigned char* mountain1_bitmap_allArray[1] = {
+static const int mountain1_bitmap_allArray_LEN = 1;
+static const unsigned char* mountain1_bitmap_allArray[1] = {
 	mountain1_bitmap_mountain
+};
+
+struct WatchFace_mountain1 : public WatchFace {
+  WatchFace_mountain1() {
+    bitmap = mountain1_bitmap_mountain;
+	layout = 1;
+
+	text1x = -1;
+    text1y = 37;
+	text1font = &BekingBold_1Gqdg20pt7b;
+	
+	text2x = -1;
+    text2y = 57;
+	text2font = &BekingBold_1Gqdg10pt7b;
+  }
 };
