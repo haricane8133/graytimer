@@ -60,6 +60,16 @@ void setup() {
     while (1) delay(1000);
   }
 
+  // Seed random number generator using RTC time for true randomness
+  DateTime now = rtcManager.rtc.now();
+  randomSeed(now.unixtime());
+
+  // Pick a random initial watchface
+  currentWatchFaceIndex = random(NUM_WATCHFACES);
+  currentWatchFace = allWatchFaces[currentWatchFaceIndex];
+  DEBUG_PRINT("Initial random watchface #");
+  DEBUG_PRINTLN(currentWatchFaceIndex);
+
   // Optional: Set time via Serial
   if (ENABLE_TIME_SETUP) {
     rtcManager.setupTimeViaSerial();
@@ -160,11 +170,17 @@ void updateDisplay() {
   // Check if it's time for full refresh (every 10 mins: :00, :10, :20, etc.)
   bool isFullRefreshTime = (currentMinute % FULL_REFRESH_INTERVAL == 0);
 
-  // Cycle to next watchface if enabled and it's full refresh time
+  // Cycle to random watchface if enabled and it's full refresh time
   if (ENABLE_WATCHFACE_CYCLING && isFullRefreshTime && !firstUpdate) {
-    currentWatchFaceIndex = (currentWatchFaceIndex + 1) % NUM_WATCHFACES;
+    // Pick a random watchface different from the current one
+    uint8_t newIndex;
+    do {
+      newIndex = random(NUM_WATCHFACES);
+    } while (newIndex == currentWatchFaceIndex && NUM_WATCHFACES > 1);
+
+    currentWatchFaceIndex = newIndex;
     currentWatchFace = allWatchFaces[currentWatchFaceIndex];
-    DEBUG_PRINT("Cycling to watchface #");
+    DEBUG_PRINT("Random watchface #");
     DEBUG_PRINT(currentWatchFaceIndex);
     DEBUG_PRINT(" (");
     DEBUG_PRINT(NUM_WATCHFACES);
