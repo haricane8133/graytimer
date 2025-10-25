@@ -1,16 +1,23 @@
 #include "myutils.h"
 
 // ==================== CONFIGURATION ====================
-const bool ENABLE_TIME_SETUP = true;  // Enable serial time input on boot
+const bool ENABLE_TIME_SETUP = false;  // Enable serial time input on boot
 const bool ENABLE_PARTIAL_REFRESH = true;  // Enable partial refresh for faster updates
 const uint8_t FULL_REFRESH_INTERVAL = 10;  // Full refresh when minute % N == 0 (e.g., :00, :10, :20, etc.)
 const bool ENABLE_WATCHFACE_CYCLING = true;  // Auto-cycle through watchfaces every 10 mins
+const bool ENABLE_SERIAL_DEBUG = false;  // Disable Serial to save ~1-2mA power (set false for deployment)
 
 // Smart polling strategy for battery optimization
 const uint16_t POLL_INTERVAL_MS = 200;      // Poll every 200ms during active window
-const uint8_t WAKE_BEFORE_MINUTE_SEC = 55;  // Wake at second 55 (5-second polling window)
+const uint8_t WAKE_BEFORE_MINUTE_SEC = 57;  // Wake at second 57 (3-second polling window)
                                             // Range: 50-57 recommended (10s-3s window)
                                             // Lower = more battery, higher = safer
+                                            // Changed from 55 to 57 for better battery (2s more sleep)
+
+// Serial debug macros (only print if enabled)
+#define DEBUG_PRINT(x) if(ENABLE_SERIAL_DEBUG) Serial.print(x)
+#define DEBUG_PRINTLN(x) if(ENABLE_SERIAL_DEBUG) Serial.println(x)
+#define DEBUG_FLUSH() if(ENABLE_SERIAL_DEBUG) Serial.flush()
 
 // Global RTC manager
 RTCManager rtcManager;
@@ -40,14 +47,16 @@ WatchFace* currentWatchFace = allWatchFaces[currentWatchFaceIndex];
  * Setup - runs once on power-on
  */
 void setup() {
-  Serial.begin(115200);
-  delay(1000);
+  if (ENABLE_SERIAL_DEBUG) {
+    Serial.begin(115200);
+    delay(1000);
+  }
 
-  Serial.println("\n=== E-Paper Watch ===");
+  DEBUG_PRINTLN("\n=== E-Paper Watch ===");
 
   // Initialize RTC
   if (!rtcManager.begin()) {
-    Serial.println("ERROR: RTC not found!");
+    DEBUG_PRINTLN("ERROR: RTC not found!");
     while (1) delay(1000);
   }
 
@@ -57,16 +66,16 @@ void setup() {
   }
 
   // Initial display update
-  Serial.println("Initializing display...");
+  DEBUG_PRINTLN("Initializing display...");
   updateDisplay();
   lastDisplayedMinute = rtcManager.getCurrentMinute();
 
-  Serial.println("Watch ready!");
-  Serial.print("Smart polling: Sleep until :");
-  Serial.print(WAKE_BEFORE_MINUTE_SEC);
-  Serial.print("s, then poll every ");
-  Serial.print(POLL_INTERVAL_MS);
-  Serial.println("ms");
+  DEBUG_PRINTLN("Watch ready!");
+  DEBUG_PRINT("Smart polling: Sleep until :");
+  DEBUG_PRINT(WAKE_BEFORE_MINUTE_SEC);
+  DEBUG_PRINT("s, then poll every ");
+  DEBUG_PRINT(POLL_INTERVAL_MS);
+  DEBUG_PRINTLN("ms");
 }
 
 /**
@@ -87,10 +96,10 @@ void loop() {
 
   // Check if minute changed
   if (currentMinute != lastDisplayedMinute) {
-    Serial.print("Minute ");
-    Serial.print(lastDisplayedMinute);
-    Serial.print(" → ");
-    Serial.println(currentMinute);
+    DEBUG_PRINT("Minute ");
+    DEBUG_PRINT(lastDisplayedMinute);
+    DEBUG_PRINT(" → ");
+    DEBUG_PRINTLN(currentMinute);
 
     updateDisplay();
     lastDisplayedMinute = currentMinute;
@@ -113,18 +122,18 @@ void loop() {
     // Sleep for calculated duration (minus 1 second for safety)
     if (sleepSeconds > 1) {
       sleepSeconds -= 1;  // Wake up 1 second early to be safe
-      Serial.print("Sleeping for ");
-      Serial.print(sleepSeconds);
-      Serial.println(" seconds...");
-      Serial.flush();
+      DEBUG_PRINT("Sleeping for ");
+      DEBUG_PRINT(sleepSeconds);
+      DEBUG_PRINTLN(" seconds...");
+      DEBUG_FLUSH();
       delay(sleepSeconds * 1000);
     }
 
     // Now we're at approximately WAKE_BEFORE_MINUTE_SEC
     // Poll every POLL_INTERVAL_MS until minute changes
-    Serial.print("Active polling (");
-    Serial.print(POLL_INTERVAL_MS);
-    Serial.println("ms) - waiting for minute change");
+    DEBUG_PRINT("Active polling (");
+    DEBUG_PRINT(POLL_INTERVAL_MS);
+    DEBUG_PRINTLN("ms) - waiting for minute change");
   }
 
   // Active polling mode - check every POLL_INTERVAL_MS
@@ -155,11 +164,11 @@ void updateDisplay() {
   if (ENABLE_WATCHFACE_CYCLING && isFullRefreshTime && !firstUpdate) {
     currentWatchFaceIndex = (currentWatchFaceIndex + 1) % NUM_WATCHFACES;
     currentWatchFace = allWatchFaces[currentWatchFaceIndex];
-    Serial.print("Cycling to watchface #");
-    Serial.print(currentWatchFaceIndex);
-    Serial.print(" (");
-    Serial.print(NUM_WATCHFACES);
-    Serial.println(" total)");
+    DEBUG_PRINT("Cycling to watchface #");
+    DEBUG_PRINT(currentWatchFaceIndex);
+    DEBUG_PRINT(" (");
+    DEBUG_PRINT(NUM_WATCHFACES);
+    DEBUG_PRINTLN(" total)");
   }
 
   // Determine refresh mode
@@ -179,12 +188,12 @@ void updateDisplay() {
   drawWatchFace(currentWatchFace, timeStr, dateStr, usePartialRefresh);
 
   unsigned long elapsed = millis() - startTime;
-  Serial.print(timeStr);
-  Serial.print(" (");
-  Serial.print(usePartialRefresh ? "partial" : "full");
-  Serial.print(", ");
-  Serial.print(elapsed);
-  Serial.println("ms)");
+  DEBUG_PRINT(timeStr);
+  DEBUG_PRINT(" (");
+  DEBUG_PRINT(usePartialRefresh ? "partial" : "full");
+  DEBUG_PRINT(", ");
+  DEBUG_PRINT(elapsed);
+  DEBUG_PRINTLN("ms)");
 
   // Put display in low-power mode
   display.hibernate();
