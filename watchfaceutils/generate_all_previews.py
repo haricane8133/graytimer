@@ -101,7 +101,10 @@ def generate_all_configured_watchfaces(output_dir="previews",
     configured_watchfaces = [
         'atat', 'atdp', 'b1', 'bird', 'bird2', 'bugs', 'crow', 'dog', 'giraffe1', 'mountain2', 'stormtrooper3_floyd',
         'h', 'krishna', 'macaw', 'mountain1', 'peacock', 'peacock3', 'pegasus', 'squares_invert', 'squares',
-        'stormtrooper2', 'tom', 'bugs', 'tree', 'walker', 'xwing', 'zebra'
+        'stormtrooper2', 'tom', 'bugs', 'tree', 'walker', 'xwing', 'zebra', 'ben10', 'claw', 'claw2', 'claw3',
+        'guitar1', 'guitar2', 'harley', 'harry934', 'herbert', 'hogwarts', 'hogwarts2', 'hogwarts3', 'hogwarts4', 'jitsu1',
+        'jitsu2', 'jitsu3', 'jitsu4', 'jitsu5', 'mikew', 'penguin_beatles', 'penguins', 'planets', 'ps', 'saturn',
+        'sensei', 'sortinghat', 'sullivan', 'thiruman'
     ]
 
     print(f"Generating previews for {len(configured_watchfaces)} watchfaces...\n")
