@@ -105,12 +105,23 @@ void setup() {
     while (1) delay(1000);
   }
 
-  // Seed random number generator using RTC time for true randomness
+  // Seed random number generator using RTC time with improved entropy
+  // NOTE: We seed once and then use the continuous LCG sequence for best distribution
   DateTime now = rtcManager.rtc.now();
-  randomSeed(now.unixtime());
 
-  // Pick a random initial watchface
+  // Create a well-distributed seed from timestamp components
+  // Using prime number multiplication for better mixing
+  unsigned long seed = now.unixtime();
+  seed = seed * 2654435761UL;  // Knuth's multiplicative hash constant
+  seed ^= (now.second() * 16777619UL);  // FNV prime
+  seed ^= (now.minute() << 11);
+  seed ^= (now.hour() << 19);
+  randomSeed(seed);
+
+  // Pick random initial watchface
+  // The continuous LCG sequence provides excellent distribution
   currentWatchFaceIndex = random(NUM_WATCHFACES);
+
   currentWatchFace = allWatchFaces[currentWatchFaceIndex];
   DEBUG_PRINT("Initial random watchface #");
   DEBUG_PRINTLN(currentWatchFaceIndex);
@@ -218,6 +229,7 @@ void updateDisplay() {
   // Cycle to random watchface if enabled and it's full refresh time
   if (ENABLE_WATCHFACE_CYCLING && isFullRefreshTime && !firstUpdate) {
     // Pick a random watchface different from the current one
+    // Using continuous LCG sequence (no re-seeding) for optimal distribution
     uint8_t newIndex;
     do {
       newIndex = random(NUM_WATCHFACES);
