@@ -4,7 +4,20 @@
 * Auto shuffles between available watchfaces every 10 mins.
 * Make this if you want to build/solder every component rather than building on a compact PCB.
 
-[Watchface Gallery!](docs/GALLERY.md)
+<table>
+  <tr>
+    <td align="center" width="45%">
+      <img src="./docs/pics/gif_full_refresh.gif" width="400"/><br/>
+      <b>Full refresh</b>
+    </td>
+    <td align="center" width="45%">
+      <img src="./docs/pics/gif_partial_refresh.gif" width="400"/><br/>
+      <b>Partial Refresh</b>
+    </td>
+  </tr>
+</table>
+
+[Gallery (includes all watchfaces)!](docs/GALLERY.md)
 
 ---
 
