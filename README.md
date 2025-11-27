@@ -49,6 +49,10 @@
 
 **[📖 Complete API Reference →](docs/API.md)**
 
+### Hardware
+
+The `/hardware` folder contains the designs to 3D print for the watch case
+
 ---
 
 ## Project Structure
