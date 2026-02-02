@@ -94,7 +94,7 @@ WatchFace* currentWatchFace = allWatchFaces[currentWatchFaceIndex];
 void setup() {
   if (ENABLE_SERIAL_DEBUG) {
     Serial.begin(115200);
-    delay(1000);
+    while (!Serial) delay(10);
   }
 
   DEBUG_PRINTLN("\n=== E-Paper Watch ===");
