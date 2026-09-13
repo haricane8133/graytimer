@@ -80,7 +80,29 @@ WatchFace* allWatchFaces[] = {
   new WatchFace_tree(),
   new WatchFace_walker(),
   new WatchFace_xwing(),
-  new WatchFace_zebra()
+  new WatchFace_zebra(),
+  // generated geometric set
+  new WatchFace_tie(),
+  new WatchFace_deathstar(),
+  new WatchFace_hallows(),
+  new WatchFace_prism(),
+  new WatchFace_orbit(),
+  new WatchFace_orion(),
+  new WatchFace_kolam(),
+  new WatchFace_vinyl(),
+  new WatchFace_sunburst(),
+  new WatchFace_minimal(),
+  new WatchFace_moon(),
+  new WatchFace_glasses(),
+  new WatchFace_snitch(),
+  new WatchFace_lightsaber(),
+  new WatchFace_rocket(),
+  new WatchFace_cassette(),
+  new WatchFace_equalizer(),
+  new WatchFace_mandala(),
+  new WatchFace_forest(),
+  new WatchFace_dial(),
+  new WatchFace_waves()
 };
 const uint8_t NUM_WATCHFACES = sizeof(allWatchFaces) / sizeof(allWatchFaces[0]);
 uint8_t currentWatchFaceIndex = 0;
