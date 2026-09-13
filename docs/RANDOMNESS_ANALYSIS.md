@@ -295,3 +295,26 @@ currentWatchFaceIndex = random(NUM_WATCHFACES);
 **Status**: ✅ VERIFIED
 **Last Updated**: 2025-10-27
 **Reviewed By**: Statistical simulation (1,050,000 test cycles)
+
+---
+
+## Addendum (2026-09-13): hardware RNG
+
+**Finding**: the software generator was never the problem. The Seeed nRF52 core's
+`random(n)` is newlib's `rand() % n` - a 64-bit LCG (`x = x * 6364136223846793005 + 1`)
+returning the high 31 bits - uniform to within ±2% over a million simulated draws, with
+negligible modulo bias for n ≈ 70. Its only weakness is that the whole run is a
+deterministic sequence unrolled from one RTC-derived boot seed.
+
+**Design decision**: each watchface change is an *independent* uniform draw. A shuffle-bag
+(every face once before any repeat) was considered and rejected: it removes repeats but
+the sequence is no longer memoryless. With ~70 faces, sampling with replacement means
+some face is expected to come back within any 6-hour window; that is accepted.
+
+**Implementation**: picks now come from the nRF52840's RNG peripheral (`NRF_RNG`), a true
+random number generator based on thermal noise, with bias correction (`DERCEN`) enabled.
+No seeding is needed and the sequence is not reproducible from the clock. Direct register
+access is valid because this sketch never enables the SoftDevice. Draws are mapped to
+`[0, n)` by rejection sampling, so there is no modulo bias at all. The only constraint is
+that a change event never re-selects the face already on screen: the draw is uniform over
+the other `NUM_WATCHFACES - 1` faces.

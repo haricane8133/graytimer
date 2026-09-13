@@ -108,6 +108,34 @@ const uint8_t NUM_WATCHFACES = sizeof(allWatchFaces) / sizeof(allWatchFaces[0]);
 uint8_t currentWatchFaceIndex = 0;
 WatchFace* currentWatchFace = allWatchFaces[currentWatchFaceIndex];
 
+// True random numbers from the nRF52840 RNG peripheral (thermal noise, with
+// bias correction). Direct register access is fine because this sketch never
+// enables the SoftDevice (no BLE). Each byte takes ~120us with DERCEN on.
+uint8_t hwRandomByte() {
+  NRF_RNG->CONFIG = RNG_CONFIG_DERCEN_Msk;
+  NRF_RNG->EVENTS_VALRDY = 0;
+  NRF_RNG->TASKS_START = 1;
+  while (NRF_RNG->EVENTS_VALRDY == 0) {}
+  uint8_t v = NRF_RNG->VALUE;
+  NRF_RNG->TASKS_STOP = 1;
+  return v;
+}
+
+// Uniform integer in [0, n) with no modulo bias (rejection sampling)
+uint8_t hwRandom(uint8_t n) {
+  uint16_t limit = 256 - (256 % n);
+  uint16_t v;
+  do { v = hwRandomByte(); } while (v >= limit);
+  return v % n;
+}
+
+// Independent uniform pick over every face except the one currently shown
+uint8_t pickNextWatchFace(uint8_t current) {
+  if (NUM_WATCHFACES < 2) return 0;
+  uint8_t r = hwRandom(NUM_WATCHFACES - 1);
+  return (r >= current) ? r + 1 : r;  // skip `current` without re-rolling
+}
+
 /**
  * Setup - runs once on power-on
  */
@@ -125,22 +153,8 @@ void setup() {
     while (1) delay(1000);
   }
 
-  // Seed random number generator using RTC time with improved entropy
-  // NOTE: We seed once and then use the continuous LCG sequence for best distribution
-  DateTime now = rtcManager.rtc.now();
-
-  // Create a well-distributed seed from timestamp components
-  // Using prime number multiplication for better mixing
-  unsigned long seed = now.unixtime();
-  seed = seed * 2654435761UL;  // Knuth's multiplicative hash constant
-  seed ^= (now.second() * 16777619UL);  // FNV prime
-  seed ^= (now.minute() << 11);
-  seed ^= (now.hour() << 19);
-  randomSeed(seed);
-
-  // Pick random initial watchface
-  // The continuous LCG sequence provides excellent distribution
-  currentWatchFaceIndex = random(NUM_WATCHFACES);
+  // Pick a random initial watchface (hardware RNG, no seeding needed)
+  currentWatchFaceIndex = hwRandom(NUM_WATCHFACES);
 
   currentWatchFace = allWatchFaces[currentWatchFaceIndex];
   DEBUG_PRINT("Initial random watchface #");
@@ -248,14 +262,8 @@ void updateDisplay() {
 
   // Cycle to random watchface if enabled and it's full refresh time
   if (ENABLE_WATCHFACE_CYCLING && isFullRefreshTime && !firstUpdate) {
-    // Pick a random watchface different from the current one
-    // Using continuous LCG sequence (no re-seeding) for optimal distribution
-    uint8_t newIndex;
-    do {
-      newIndex = random(NUM_WATCHFACES);
-    } while (newIndex == currentWatchFaceIndex && NUM_WATCHFACES > 1);
-
-    currentWatchFaceIndex = newIndex;
+    // Independent uniform draw each time, excluding only the face on screen now
+    currentWatchFaceIndex = pickNextWatchFace(currentWatchFaceIndex);
     currentWatchFace = allWatchFaces[currentWatchFaceIndex];
     DEBUG_PRINT("Random watchface #");
     DEBUG_PRINT(currentWatchFaceIndex);
