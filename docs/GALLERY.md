@@ -28,7 +28,7 @@
 </table>
 
 
-Browse all 54 available watchfaces for the e-paper watch project.
+Browse all 52 available watchfaces for the e-paper watch project.
 
 ---
 
@@ -149,20 +149,20 @@ Browse all 54 available watchfaces for the e-paper watch project.
       <img src="../watchfaceutils/previews/bird2.png" width="200"/><br/>
       <b>Bird 2</b>
     </td>
-    <td align="center" width="33%">
+    <!-- <td align="center" width="33%">
       <img src="../watchfaceutils/previews/crow.png" width="200"/><br/>
       <b>Crow</b>
-    </td>
+    </td> -->
   </tr>
   <tr>
     <td align="center" width="33%">
       <img src="../watchfaceutils/previews/dog.png" width="200"/><br/>
       <b>Dog</b>
     </td>
-    <td align="center" width="33%">
+    <!-- <td align="center" width="33%">
       <img src="../watchfaceutils/previews/giraffe1.png" width="200"/><br/>
       <b>Giraffe</b>
-    </td>
+    </td> -->
     <td align="center" width="33%">
       <img src="../watchfaceutils/previews/macaw.png" width="200"/><br/>
       <b>Macaw</b>
@@ -196,10 +196,10 @@ Browse all 54 available watchfaces for the e-paper watch project.
       <img src="../watchfaceutils/previews/bugs.png" width="200"/><br/>
       <b>Bugs Bunny</b>
     </td>
-    <td align="center" width="33%">
+    <!-- <td align="center" width="33%">
       <img src="../watchfaceutils/previews/claw.png" width="200"/><br/>
       <b>Claw</b>
-    </td>
+    </td> -->
   </tr>
   <tr>
     <td align="center" width="33%">
@@ -318,14 +318,6 @@ Browse all 54 available watchfaces for the e-paper watch project.
       <img src="../watchfaceutils/previews/h.png" width="200"/><br/>
       <b>haricane8133</b>
     </td>
-    <td align="center" width="33%">
-      <img src="../watchfaceutils/previews/squares.png" width="200"/><br/>
-      <b>Squares</b>
-    </td>
-    <td align="center" width="33%">
-      <img src="../watchfaceutils/previews/squares_invert.png" width="200"/><br/>
-      <b>Squares Inverted</b>
-    </td>
   </tr>
   <tr>
     <td align="center" width="33%">
@@ -369,4 +361,4 @@ For complete API documentation, see [README-DETAILED.md](README-DETAILED.md#watc
 
 ---
 
-**Total Watchfaces**: 54 and growing! 🎨
+**Total Watchfaces**: 52 and growing! 🎨
