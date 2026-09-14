@@ -6,7 +6,7 @@ Complete documentation for the e-paper watch project.
 
 ## Documentation Index
 
-- **[Watchface Gallery](GALLERY.md)** - Browse all 70 watchfaces with preview images
+- **[Watchface Gallery](GALLERY.md)** - Browse all 95 watchfaces with preview images
 - **[WatchFace API Reference](API.md)** - Complete API documentation for creating custom watchfaces
 - **[Hardware Guide](HARDWARE.md)** - Detailed hardware specifications, wiring, and assembly
 
@@ -15,7 +15,7 @@ Complete documentation for the e-paper watch project.
 ## Features
 
 - **Display**: 200×200 monochrome e-paper (1.54", 200 DPI)
-- **Watchfaces**: 70+ pre-configured with custom fonts
+- **Watchfaces**: 95+ pre-configured with custom fonts
 - **Time Keeping**: DS3231 RTC (±2 minutes/year accuracy)
 - **Refresh Modes**: Partial (fast) and full (ghosting-free)
 - **Development Tools**: Python scripts for creating custom watchfaces
@@ -143,7 +143,7 @@ WatchFace* allWatchFaces[] = {
 
 ## Watchface Gallery
 
-**[📸 View All 70 Watchfaces →](GALLERY.md)**
+**[📸 View All 95 Watchfaces →](GALLERY.md)**
 
 Preview of available watchfaces:
 
@@ -178,7 +178,7 @@ Preview of available watchfaces:
   </tr>
 </table>
 
-**Collections**: Star Wars (9) • Harry Potter (9) • Club Penguin (7) • Animals (7) • Other Characters (11) • Music & Entertainment (7) • Nature & Landscapes (6) • Space (5) • Cultural & Spiritual (4) • Abstract & Patterns (5)
+**Collections**: Star Wars (13) • Harry Potter (10) • Club Penguin (8) • Animals (9) • Other Characters (11) • Horizon Zero Dawn (6) • Music & Entertainment (8) • Nature & Landscapes (9) • Space (7) • Cultural & Spiritual (6) • Everyday Things (3) • Abstract & Patterns (5)
 
 ---
 

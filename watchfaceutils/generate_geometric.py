@@ -16,11 +16,12 @@ import random
 import sys
 from pathlib import Path
 
-from PIL import Image, ImageDraw
+from PIL import Image, ImageDraw, ImageFont
 
 W = 200          # display size
 SS = 4           # supersample factor
 OUT_DIR = Path(__file__).parent.parent / "mywatchfaces"
+SRC_DIR = Path(__file__).parent / "sources"
 
 
 # ---------------------------------------------------------------------------
@@ -64,6 +65,25 @@ class Canvas:
         if outline is not None:
             self.d.ellipse(box, outline=outline, width=int(width * SS))
 
+    def ellipse(self, c, rx, ry, width=2, fill=None, outline=None):
+        box = [(c[0] - rx) * SS, (c[1] - ry) * SS, (c[0] + rx) * SS, (c[1] + ry) * SS]
+        if fill is not None:
+            self.d.ellipse(box, fill=fill)
+        if outline is not None:
+            self.d.ellipse(box, outline=outline, width=int(width * SS))
+
+    def arc(self, c, r, a0, a1, width=2, color=None):
+        """Arc of a circle, angles in degrees clockwise from +x (PIL convention)."""
+        box = [(c[0] - r) * SS, (c[1] - r) * SS, (c[0] + r) * SS, (c[1] + r) * SS]
+        self.d.arc(box, a0, a1, fill=self.ink if color is None else color, width=int(width * SS))
+
+    def rrect(self, p0, p1, rad, width=2, fill=None, outline=None):
+        box = [p0[0] * SS, p0[1] * SS, p1[0] * SS, p1[1] * SS]
+        if fill is not None:
+            self.d.rounded_rectangle(box, radius=rad * SS, fill=fill)
+        if outline is not None:
+            self.d.rounded_rectangle(box, radius=rad * SS, outline=outline, width=int(width * SS))
+
     def disc(self, c, r, color=None):
         self.circle(c, r, fill=self.ink if color is None else color)
 
@@ -90,6 +110,25 @@ class Canvas:
             a = math.radians(a0 + (a1 - a0) * i / steps)
             pts.append((c[0] + r_in * math.cos(a), c[1] + r_in * math.sin(a)))
         self.polygon(pts, fill=col)
+
+    def silhouette(self, path, box, flip=False):
+        """Paste a 1-bit silhouette PNG (black = ink) scaled to fit box=(x0,y0,x1,y1)."""
+        im = Image.open(path).convert("L")
+        if flip:
+            im = im.transpose(Image.FLIP_LEFT_RIGHT)
+        bw, bh = box[2] - box[0], box[3] - box[1]
+        sc = min(bw / im.width, bh / im.height)
+        im = im.resize((int(im.width * sc * SS), int(im.height * sc * SS)), Image.LANCZOS)
+        mask = im.point(lambda v: 255 if v < 128 else 0)
+        x = int((box[0] + (bw - im.width / SS) / 2) * SS)
+        y = int((box[1] + (bh - im.height / SS) / 2) * SS)
+        self.img.paste(self.ink, (x, y), mask)
+
+    def text(self, txt, font_path, size, center, index=0):
+        """Draw text from a system/TTF font, centred at `center`."""
+        f = ImageFont.truetype(font_path, int(size * SS), index=index)
+        l, t, r, b = self.d.textbbox((0, 0), txt, font=f)
+        self.d.text((center[0] * SS - (l + r) / 2, center[1] * SS - (t + b) / 2), txt, font=f, fill=self.ink)
 
     def to_bits(self):
         small = self.img.resize((W, W), Image.LANCZOS)
@@ -662,6 +701,539 @@ def waves():
         ("layout", 1),
         ("text1x", 6), ("text1y", 14), ("text1font", "&OctoberTwilight_Ooe615pt7b"),
         ("text2x", 6), ("text2y", 36), ("text2font", "&OctoberTwilight_Ooe610pt7b"),
+    ]
+
+
+# ---------------------------------------------------------------------------
+# Batch 3 - clip-art style
+# ---------------------------------------------------------------------------
+
+@face
+def r2d2():
+    """R2-D2 front view."""
+    c = Canvas()
+    # dome
+    c.arc((100, 58), 30, 180, 360, width=4)
+    c.line((70, 58), (130, 58), width=3)
+    c.ring((108, 40), 6, width=2.5)
+    c.disc((108, 40), 2)
+    c.ring((92, 48), 3, width=2)
+    c.line((84, 36), (96, 30), width=2)
+    # body
+    c.polygon([(70, 58), (130, 58), (130, 128), (70, 128)], outline=c.ink, width=4)
+    c.polygon([(78, 66), (96, 66), (96, 82), (78, 82)], outline=c.ink, width=2)
+    c.polygon([(104, 66), (122, 66), (122, 82), (104, 82)], outline=c.ink, width=2)
+    for x0 in (78, 106):
+        c.polygon([(x0, 92), (x0 + 16, 92), (x0 + 16, 116), (x0, 116)], outline=c.ink, width=2)
+        for yy in (98, 104, 110):
+            c.line((x0, yy), (x0 + 16, yy), width=1.5)
+    # legs
+    for x0 in (48, 134):
+        c.polygon([(x0, 64), (x0 + 18, 64), (x0 + 18, 130), (x0, 130)], outline=c.ink, width=3.5)
+        c.polygon([(x0 + 2, 66), (x0 + 16, 66), (x0 + 16, 76), (x0 + 2, 76)], fill=c.ink)
+        c.polygon([(x0 - 4, 130), (x0 + 22, 130), (x0 + 18, 142), (x0, 142)], outline=c.ink, width=3)
+    c.polygon([(88, 128), (112, 128), (108, 142), (92, 142)], outline=c.ink, width=3)
+    return c, [
+        ("layout", 1), ("noAMPM", "true"),
+        ("text1x", -1), ("text1y", 74), ("text1font", "&StarJedi_DGRW20pt7b"),
+        ("text2x", -1), ("text2y", 91), ("text2font", "&StarJedi_DGRW10pt7b"),
+    ]
+
+
+@face
+def falcon():
+    """Millennium Falcon, top-down, nose to the right."""
+    c = Canvas()
+    cx, cy, R = 84, 88, 54
+    c.disc((cx, cy), R, color=c.paper)
+    c.ring((cx, cy), R, width=4)
+    c.ring((cx, cy), 40, width=1.5)
+    for k in range(12):
+        a = math.radians(k * 30 + 15)
+        c.line((cx + 40 * math.cos(a), cy + 40 * math.sin(a)), (cx + 52 * math.cos(a), cy + 52 * math.sin(a)), width=1.5)
+    # radar dish
+    c.ring((cx - 20, cy - 24), 8, width=2.5)
+    c.line((cx - 20, cy - 24), (cx - 10, cy - 32), width=2)
+    # mandibles with the notch between them
+    for y0 in (cy - 30, cy + 8):
+        c.polygon([(cx + 36, y0), (cx + 108, y0), (cx + 108, y0 + 22), (cx + 36, y0 + 22)], fill=c.paper)
+        c.polygon([(cx + 36, y0), (cx + 108, y0), (cx + 108, y0 + 22), (cx + 36, y0 + 22)], outline=c.ink, width=3.5)
+        c.line((cx + 40, y0 + 11), (cx + 104, y0 + 11), width=1.5)
+    c.polygon([(cx + 30, cy - 8), (cx + 110, cy - 8), (cx + 110, cy + 8), (cx + 30, cy + 8)], fill=c.paper)
+    c.line((cx + 36, cy - 8), (cx + 36, cy + 8), width=3.5)
+    c.line((cx + 36, cy - 8), (cx + 108, cy - 8), width=3.5)
+    c.line((cx + 36, cy + 8), (cx + 108, cy + 8), width=3.5)
+    # cockpit tube on top, pointing up-right
+    a = math.radians(-45)
+    p0 = (cx + 34 * math.cos(a), cy + 34 * math.sin(a))
+    p1 = (cx + 80 * math.cos(a), cy + 80 * math.sin(a))
+    c.line(p0, p1, width=13)
+    c.line(p0, p1, width=7, color=c.paper)
+    c.disc(p1, 10)
+    c.disc(p1, 5, color=c.paper)
+    return c, [
+        ("layout", 1), ("noAMPM", "true"),
+        ("text1x", -1), ("text1y", 75), ("text1font", "&StarJedi_DGRW20pt7b"),
+        ("text2x", -1), ("text2y", 91), ("text2font", "&StarJedi_DGRW10pt7b"),
+    ]
+
+
+@face
+def hedwig():
+    """Owl on a branch."""
+    c = Canvas()
+    hx, hy = 100, 50
+    # ear tufts
+    c.polygon([(76, 34), (66, 12), (90, 26)], fill=c.ink)
+    c.polygon([(124, 34), (134, 12), (110, 26)], fill=c.ink)
+    # body then head
+    c.ellipse((100, 104), 34, 42, fill=c.paper, outline=c.ink, width=4)
+    c.disc((hx, hy), 30, color=c.paper)
+    c.ring((hx, hy), 30, width=4)
+    for ex in (86, 114):
+        c.ring((ex, hy - 2), 11, width=3)
+        c.disc((ex + 1, hy - 1), 4)
+    c.polygon([(94, 60), (106, 60), (100, 72)], fill=c.ink)
+    # wings
+    c.polyline([(68, 92), (62, 118), (70, 142)], width=3)
+    c.polyline([(132, 92), (138, 118), (130, 142)], width=3)
+    # belly feathers
+    for row, y in enumerate((96, 110, 124)):
+        for x in range(88 - (row % 2) * 6, 118, 12):
+            c.polyline([(x - 4, y), (x, y + 5), (x + 4, y)], width=1.5)
+    # feet + branch
+    for fx in (88, 112):
+        for dx in (-5, 0, 5):
+            c.line((fx, 144), (fx + dx, 152), width=2)
+    c.line((24, 152), (176, 152), width=4)
+    c.line((150, 152), (166, 140), width=3)
+    return c, [
+        ("layout", 0),
+        ("text1x", -1), ("text1y", 79), ("text1font", "&HARRYP__20pt7b"),
+        ("text2font", "&HARRYP__10pt7b"),
+    ]
+
+
+@face
+def penguin():
+    """Club Penguin style penguin."""
+    c = Canvas()
+    bx, by = 100, 94
+    # flippers behind body
+    c.polygon([(66, 84), (34, 118), (50, 126), (72, 104)], fill=c.paper, outline=c.ink, width=3.5)
+    c.polygon([(134, 84), (166, 118), (150, 126), (128, 104)], fill=c.paper, outline=c.ink, width=3.5)
+    c.ellipse((bx, by), 38, 46, fill=c.paper, outline=c.ink, width=4)
+    c.ellipse((bx, by + 12), 26, 30, outline=c.ink, width=2)
+    for ex in (89, 111):
+        c.ring((ex, 78), 7, width=2.5)
+        c.disc((ex + 1, 79), 3)
+    c.polygon([(90, 90), (100, 85), (110, 90), (100, 98)], fill=c.paper, outline=c.ink, width=2.5)
+    c.line((90, 90), (110, 90), width=1.5)
+    for fx in (84, 116):
+        c.ellipse((fx, 144), 15, 6, fill=c.paper, outline=c.ink, width=3)
+    return c, [
+        ("layout", 1),
+        ("text1x", -1), ("text1y", 77), ("text1font", "&DynaPuff_VariableFont_wdth_wght20pt7b"),
+        ("text2x", -1), ("text2y", 92), ("text2font", "&DynaPuff_VariableFont_wdth_wght10pt7b"),
+    ]
+
+
+@face
+def headphones():
+    """Headphones; time between the cups."""
+    c = Canvas()
+    c.arc((100, 104), 76, 180, 360, width=7)
+    for x0 in (16, 154):
+        c.line((x0 + 15, 96), (x0 + 15, 104), width=6)
+        c.rrect((x0, 100), (x0 + 30, 152), 9, fill=c.ink)
+        c.rrect((x0 + 8, 108), (x0 + 22, 144), 5, fill=c.paper)
+    return c, [
+        ("layout", 1),
+        ("text1x", -1), ("text1y", 46), ("text1font", "&CompactaBT20pt7b"),
+        ("text2x", -1), ("text2y", 64), ("text2font", "&CompactaBT10pt7b"),
+    ]
+
+
+@face
+def ufo():
+    """Flying saucer with the time caught in its beam."""
+    c = Canvas()
+    c.arc((100, 48), 26, 180, 360, width=4)
+    c.ellipse((100, 54), 66, 15, fill=c.paper, outline=c.ink, width=4)
+    for x in (52, 76, 100, 124, 148):
+        c.disc((x, 60), 3)
+    c.disc((92, 38), 2)
+    c.disc((108, 38), 2)
+    c.line((80, 68), (40, 196), width=2.5)
+    c.line((120, 68), (160, 196), width=2.5)
+    for y in (100, 130, 160, 190):
+        half = 20 + 40 * (y - 68) / 128
+        c.line((100 - half, y), (100 + half, y), width=1, color=c.ink)
+    return c, [
+        ("layout", 1), ("noAMPM", "true"),
+        ("text1x", -1), ("text1y", 66), ("text1font", "&Bootle_4B9l20pt7b"),
+        ("text2x", -1), ("text2y", 85), ("text2font", "&Bootle_4B9l10pt7b"),
+    ]
+
+
+@face
+def balloon():
+    """Hot-air balloon."""
+    c = Canvas()
+    cx, cy = 100, 60
+    c.ellipse((cx, cy), 46, 50, fill=c.paper, outline=c.ink, width=4)
+    c.ellipse((cx, cy), 30, 50, outline=c.ink, width=2)
+    c.ellipse((cx, cy), 12, 50, outline=c.ink, width=2)
+    c.line((cx - 46, cy), (cx + 46, cy), width=2)
+    c.line((cx - 30, cy + 38), (cx - 12, cy + 72), width=3)
+    c.line((cx + 30, cy + 38), (cx + 12, cy + 72), width=3)
+    c.line((cx - 12, cy + 72), (cx - 12, cy + 80), width=2)
+    c.line((cx + 12, cy + 72), (cx + 12, cy + 80), width=2)
+    c.polygon([(cx - 16, cy + 80), (cx + 16, cy + 80), (cx + 16, cy + 98), (cx - 16, cy + 98)], outline=c.ink, width=3)
+    for yy in (cy + 86, cy + 92):
+        c.line((cx - 16, yy), (cx + 16, yy), width=1.2)
+    for xx in (cx - 8, cx, cx + 8):
+        c.line((xx, cy + 80), (xx, cy + 98), width=1.2)
+    return c, [
+        ("layout", 0),
+        ("text1x", -1), ("text1y", 81), ("text1font", "&CompactaBT20pt7b"),
+        ("text2font", "&CompactaBT10pt7b"),
+    ]
+
+
+@face
+def lighthouse():
+    """Lighthouse on the left, beam sweeping over the time."""
+    c = Canvas()
+    lx = 42
+    top, bot = 46, 158
+    def half_w(y):
+        return 9 + 9 * (y - top) / (bot - top)
+    c.polygon([(lx - half_w(top), top), (lx + half_w(top), top), (lx + half_w(bot), bot), (lx - half_w(bot), bot)],
+              outline=c.ink, width=3.5)
+    for y0, y1 in ((66, 84), (104, 122), (142, 158)):
+        c.polygon([(lx - half_w(y0), y0), (lx + half_w(y0), y0), (lx + half_w(y1), y1), (lx - half_w(y1), y1)], fill=c.ink)
+    c.polygon([(lx - 11, 30), (lx + 11, 30), (lx + 11, 46), (lx - 11, 46)], outline=c.ink, width=3)
+    c.line((lx, 30), (lx, 46), width=2)
+    c.polygon([(lx - 15, 30), (lx + 15, 30), (lx, 16)], fill=c.ink)
+    c.disc((lx, 16), 3)
+    # beam
+    c.line((lx + 11, 38), (196, 18), width=2.5)
+    c.line((lx + 11, 38), (196, 74), width=2.5)
+    # rocks + water
+    c.polygon([(lx - 30, 158), (lx + 30, 158), (lx + 42, 170), (lx - 42, 170)], fill=c.ink)
+    for base, phase in ((176, 0), (188, 2)):
+        pts = [(x, base + 4 * math.sin(2 * math.pi * x / 40 + phase)) for x in range(-5, 206, 2)]
+        c.polyline(pts, width=2.5)
+    return c, [
+        ("layout", 1),
+        ("text1x", 40), ("text1y", 44), ("text1font", "&CompactaBT20pt7b"),
+        ("text2x", 40), ("text2y", 63), ("text2font", "&CompactaBT10pt7b"),
+    ]
+
+
+@face
+def diya():
+    """Oil lamp with a flame; time above."""
+    c = Canvas()
+    # flame: outer teardrop, inner glow
+    def teardrop(cx, top, bottom, w):
+        pts = []
+        for i in range(25):
+            t = i / 24
+            y = top + (bottom - top) * t
+            pts.append((cx + w * math.sin(math.pi * t) ** 0.8 * (0.35 + 0.65 * t), y))
+        for i in range(24, -1, -1):
+            t = i / 24
+            y = top + (bottom - top) * t
+            pts.append((cx - w * math.sin(math.pi * t) ** 0.8 * (0.35 + 0.65 * t), y))
+        return pts
+    c.polygon(teardrop(100, 66, 122, 16), fill=c.ink)
+    c.polygon(teardrop(100, 94, 120, 7), fill=c.paper)
+    # bowl
+    bowl = [(40, 126), (160, 126)] + [(100 + 60 * math.cos(math.radians(a)), 126 + 24 * math.sin(math.radians(a))) for a in range(0, 181, 6)]
+    c.polygon(bowl, fill=c.paper, outline=c.ink, width=4)
+    c.line((40, 126), (160, 126), width=4)
+    c.line((52, 134), (148, 134), width=1.5)
+    c.polygon([(82, 150), (118, 150), (124, 160), (76, 160)], outline=c.ink, width=3)
+    for p, sz in (((56, 78), 5), ((146, 84), 4), ((70, 100), 3), ((136, 106), 3)):
+        c.sparkle(p, sz)
+    return c, [
+        ("layout", 1),
+        ("text1x", -1), ("text1y", 8), ("text1font", "&Caveat_VariableFont_wght20pt7b"),
+        ("text2x", -1), ("text2y", 26), ("text2font", "&Caveat_VariableFont_wght10pt7b"),
+    ]
+
+
+@face
+def coffee():
+    """Mug with steam; time on the mug."""
+    c = Canvas()
+    c.ellipse((100, 162), 64, 10, outline=c.ink, width=3)
+    c.ring((146, 118), 20, width=6)
+    c.rrect((50, 78), (140, 162), 10, fill=c.paper, outline=c.ink, width=4)
+    for x in (76, 96, 116):
+        pts = [(x + 5 * math.sin((y - 30) / 8), y) for y in range(30, 68, 2)]
+        c.polyline(pts, width=2.5)
+    return c, [
+        ("layout", 1), ("noAMPM", "true"),
+        ("text1x", -1), ("text1y", 46), ("text1font", "&Bootle_4B9l20pt7b"),
+        ("text2x", -1), ("text2y", 65), ("text2font", "&Bootle_4B9l10pt7b"),
+    ]
+
+
+@face
+def bicycle():
+    """Bicycle; time above."""
+    c = Canvas()
+    rw, fw, bb = (46, 138), (154, 138), (100, 140)
+    seat, head = (84, 88), (132, 88)
+    for hub in (rw, fw):
+        c.ring(hub, 34, width=4)
+        for k in range(8):
+            a = math.radians(k * 45 + 22)
+            c.line(hub, (hub[0] + 32 * math.cos(a), hub[1] + 32 * math.sin(a)), width=1.2)
+        c.disc(hub, 4)
+    for a, b in ((rw, bb), (bb, seat), (seat, rw), (seat, head), (bb, head), (head, fw)):
+        c.line(a, b, width=3.5)
+    c.ring(bb, 8, width=3)
+    c.line((72, 84), (96, 84), width=5)            # saddle
+    c.line((84, 88), (86, 84), width=3)
+    c.line(head, (126, 72), width=3.5)              # stem
+    c.line((114, 70), (140, 70), width=4)           # handlebar
+    return c, [
+        ("layout", 1),
+        ("text1x", -1), ("text1y", 5), ("text1font", "&Neuton_Bold20pt7b"),
+        ("text2x", -1), ("text2y", 22), ("text2font", "&Neuton_Bold10pt7b"),
+    ]
+
+
+@face
+def whale():
+    """Whale with a spout; time top-right."""
+    c = Canvas()
+    # tail first, body over it
+    c.polygon([(150, 104), (184, 84), (176, 106), (188, 126), (150, 120)], fill=c.paper, outline=c.ink, width=3.5)
+    c.ellipse((96, 112), 66, 34, fill=c.paper, outline=c.ink, width=4)
+    c.polygon([(92, 134), (104, 154), (116, 138)], fill=c.paper, outline=c.ink, width=3)
+    c.disc((48, 102), 3.5)
+    c.polyline([(32, 118), (54, 124), (78, 124)], width=2.5)
+    for y in (132, 140):
+        c.line((44, y), (118, y), width=1.5)
+    # spout
+    c.polyline([(64, 78), (60, 62), (50, 46)], width=2.5)
+    c.polyline([(64, 78), (68, 60), (78, 46)], width=2.5)
+    for p in ((46, 40), (82, 40), (64, 44)):
+        c.disc(p, 2.5)
+    for base, phase in ((166, 0), (182, 2)):
+        pts = [(x, base + 4 * math.sin(2 * math.pi * x / 44 + phase)) for x in range(-5, 206, 2)]
+        c.polyline(pts, width=2.5)
+    return c, [
+        ("layout", 1),
+        ("text1x", 40), ("text1y", 8), ("text1font", "&CompactaBT20pt7b"),
+        ("text2x", 40), ("text2y", 27), ("text2font", "&CompactaBT10pt7b"),
+    ]
+
+
+# ---------------------------------------------------------------------------
+# Batch 4 - Horizon Zero Dawn machines (silhouettes from sources/hzd) + more clip art
+# ---------------------------------------------------------------------------
+
+HZD_TIME = [("text1font", "&Orbitron_Bold15pt7b")]
+HZD_DATE = [("text2font", "&Orbitron_Bold10pt7b")]
+
+
+@face
+def thunderjaw():
+    c = Canvas()
+    c.silhouette(SRC_DIR / "hzd/thunderjaw.png", (2, 84, 198, 198))
+    return c, [("layout", 1), ("text1x", -1), ("text1y", 8)] + HZD_TIME + [("text2x", -1), ("text2y", 26)] + HZD_DATE
+
+
+@face
+def watcher():
+    c = Canvas()
+    c.silhouette(SRC_DIR / "hzd/watcher.png", (56, 40, 198, 190), flip=True)
+    return c, [("layout", 1), ("text1x", 4), ("text1y", 5)] + HZD_TIME + [("text2x", 4), ("text2y", 86)] + HZD_DATE
+
+
+@face
+def sawtooth():
+    c = Canvas()
+    c.silhouette(SRC_DIR / "hzd/sawtooth.png", (50, 56, 198, 198))
+    return c, [("layout", 1), ("text1x", 4), ("text1y", 5)] + HZD_TIME + [("text2x", 4), ("text2y", 22)] + HZD_DATE
+
+
+@face
+def stormbird():
+    c = Canvas()
+    c.silhouette(SRC_DIR / "hzd/stormbird.png", (30, 2, 170, 144))
+    return c, [("layout", 1), ("text1x", -1), ("text1y", 75)] + HZD_TIME + [("text2x", -1), ("text2y", 90)] + HZD_DATE
+
+
+@face
+def strider():
+    c = Canvas()
+    c.silhouette(SRC_DIR / "hzd/strider.png", (16, 66, 184, 198))
+    return c, [("layout", 1), ("text1x", -1), ("text1y", 8)] + HZD_TIME + [("text2x", -1), ("text2y", 26)] + HZD_DATE
+
+
+@face
+def vader():
+    """Darth Vader helmet (from sources/sw/vader.png)."""
+    c = Canvas()
+    c.silhouette(SRC_DIR / "sw/vader.png", (30, 2, 170, 150))
+    return c, [
+        ("layout", 1), ("noAMPM", "true"),
+        ("text1x", -1), ("text1y", 77), ("text1font", "&StarJedi_DGRW20pt7b"),
+        ("text2x", -1), ("text2y", 92), ("text2font", "&StarJedi_DGRW10pt7b"),
+    ]
+
+
+@face
+def mando():
+    """Mandalorian helmet (from sources/sw/mando.png)."""
+    c = Canvas()
+    c.silhouette(SRC_DIR / "sw/mando.png", (10, 8, 190, 150))
+    return c, [
+        ("layout", 1), ("noAMPM", "true"),
+        ("text1x", -1), ("text1y", 77), ("text1font", "&StarJedi_DGRW20pt7b"),
+        ("text2x", -1), ("text2y", 92), ("text2font", "&StarJedi_DGRW10pt7b"),
+    ]
+
+
+@face
+def boodoor():
+    """Boo's door from Monsters Inc; time on the middle panel."""
+    c = Canvas()
+    c.polygon([(52, 14), (148, 14), (148, 186), (52, 186)], outline=c.ink, width=4)
+    for y0, y1 in ((24, 72), (82, 130), (140, 176)):
+        c.polygon([(62, y0), (138, y0), (138, y1), (62, y1)], outline=c.ink, width=2)
+    c.disc((132, 106), 4)
+    def flower(x, y, r):
+        for k in range(5):
+            a = math.radians(k * 72 - 90)
+            c.ring((x + r * math.cos(a), y + r * math.sin(a)), r * 0.7, width=2)
+        c.disc((x, y), r * 0.45)
+    flower(80, 46, 8)
+    flower(118, 52, 7)
+    flower(100, 160, 6)
+    c.line((70, 60), (80, 46), width=1.5)
+    return c, [
+        ("layout", 1), ("noAMPM", "true"),
+        ("text1x", -1), ("text1y", 46), ("text1font", "&Monster_AG20pt7b"),
+        ("text2x", -1), ("text2y", 60), ("text2font", "&Monster_AG10pt7b"),
+    ]
+
+
+@face
+def astronaut():
+    """Astronaut; time and date on one line below."""
+    c = Canvas()
+    # backpack, torso, arms, legs, then helmet on top
+    c.polygon([(60, 84), (140, 84), (140, 126), (60, 126)], fill=c.paper, outline=c.ink, width=3)
+    c.line((66, 92), (44, 124), width=12)
+    c.line((134, 92), (156, 124), width=12)
+    c.line((66, 92), (44, 124), width=6, color=c.paper)
+    c.line((134, 92), (156, 124), width=6, color=c.paper)
+    c.disc((42, 128), 7)
+    c.disc((158, 128), 7)
+    c.rrect((70, 80), (130, 134), 10, fill=c.paper, outline=c.ink, width=4)
+    c.polygon([(84, 96), (116, 96), (116, 112), (84, 112)], outline=c.ink, width=2)
+    c.disc((90, 104), 2); c.disc((100, 104), 2); c.disc((110, 104), 2)
+    for x0 in (76, 106):
+        c.rrect((x0, 132), (x0 + 18, 156), 4, fill=c.paper, outline=c.ink, width=3.5)
+        c.rrect((x0 - 2, 152), (x0 + 20, 160), 3, fill=c.ink)
+    c.disc((100, 48), 30, color=c.paper)
+    c.ring((100, 48), 30, width=4)
+    c.ellipse((100, 50), 21, 18, fill=c.ink)
+    c.arc((100, 50), 14, 200, 300, width=3, color=c.paper)
+    return c, [
+        ("layout", 0),
+        ("text1x", -1), ("text1y", 82), ("text1font", "&CompactaBT20pt7b"),
+        ("text2font", "&CompactaBT10pt7b"),
+    ]
+
+
+@face
+def cat():
+    """Sitting cat silhouette; time top-left."""
+    c = Canvas()
+    c.polyline([(84, 176), (54, 178), (36, 160), (40, 134)], width=8)
+    c.ellipse((116, 138), 36, 46, fill=c.ink)
+    c.polygon([(114, 66), (118, 34), (134, 60)], fill=c.ink)
+    c.polygon([(146, 60), (158, 32), (162, 66)], fill=c.ink)
+    c.disc((138, 76), 26)
+    for ex in (128, 148):
+        c.ellipse((ex, 74), 5, 3, fill=c.paper)
+        c.line((ex, 71), (ex, 77), width=1.5)
+    c.polygon([(135, 84), (141, 84), (138, 88)], fill=c.paper)
+    for y in (84, 88):
+        c.line((110, y), (124, y + (y - 86) * 2), width=1.2)
+        c.line((166, y), (152, y + (y - 86) * 2), width=1.2)
+    c.line((70, 184), (162, 184), width=3)
+    return c, [
+        ("layout", 1),
+        ("text1x", 4), ("text1y", 6), ("text1font", "&Neuton_Bold20pt7b"),
+        ("text2x", 4), ("text2y", 22), ("text2font", "&Neuton_Bold10pt7b"),
+    ]
+
+
+@face
+def camera():
+    """Retro rangefinder camera."""
+    c = Canvas()
+    c.rrect((70, 66), (100, 78), 3, fill=c.paper, outline=c.ink, width=3)
+    c.polygon([(140, 68), (150, 68), (150, 78), (140, 78)], fill=c.ink)
+    c.polygon([(24, 76), (176, 76), (176, 88), (24, 88)], fill=c.paper, outline=c.ink, width=3)
+    c.rrect((24, 88), (176, 166), 8, fill=c.paper, outline=c.ink, width=4)
+    c.ring((100, 126), 30, width=4)
+    c.ring((100, 126), 22, width=2)
+    c.ring((100, 126), 12, width=2)
+    c.disc((100, 126), 12)
+    c.disc((94, 120), 3, color=c.paper)
+    c.polygon([(36, 98), (58, 98), (58, 110), (36, 110)], outline=c.ink, width=2)
+    c.polygon([(142, 98), (164, 98), (164, 110), (142, 110)], outline=c.ink, width=2)
+    return c, [
+        ("layout", 1),
+        ("text1x", -1), ("text1y", 4), ("text1font", "&CompactaBT20pt7b"),
+        ("text2x", -1), ("text2y", 21), ("text2font", "&CompactaBT10pt7b"),
+    ]
+
+
+@face
+def sailboat():
+    """Sailboat bottom-right, time top-left."""
+    c = Canvas()
+    c.polygon([(92, 160), (188, 160), (176, 178), (104, 178)], fill=c.ink)
+    c.line((140, 66), (140, 160), width=4)
+    c.polygon([(144, 72), (144, 152), (186, 152)], fill=c.paper, outline=c.ink, width=4)
+    c.polygon([(136, 84), (136, 152), (100, 152)], fill=c.paper, outline=c.ink, width=4)
+    c.polygon([(140, 60), (152, 64), (140, 68)], fill=c.ink)
+    for base, phase in ((184, 0), (194, 2.2)):
+        pts = [(x, base + 3.5 * math.sin(2 * math.pi * x / 40 + phase)) for x in range(-5, 206, 2)]
+        c.polyline(pts, width=2.5)
+    c.ring((40, 60), 12, width=3)
+    for k in range(8):
+        a = math.radians(k * 45)
+        c.line((40 + 16 * math.cos(a), 60 + 16 * math.sin(a)), (40 + 22 * math.cos(a), 60 + 22 * math.sin(a)), width=2)
+    return c, [
+        ("layout", 1),
+        ("text1x", -1), ("text1y", 4), ("text1font", "&Neuton_Bold20pt7b"),
+        ("text2x", -1), ("text2y", 21), ("text2font", "&Neuton_Bold10pt7b"),
+    ]
+
+
+@face
+def hari():
+    """Tamil script - Hari, from the system Tamil font."""
+    c = Canvas()
+    c.text("\u0bb9\u0bb0\u0bbf", "/System/Library/Fonts/Supplemental/Tamil MN.ttc", 78, (100, 76), index=1)
+    c.line((40, 132), (160, 132), width=2)
+    return c, [
+        ("layout", 1),
+        ("text1x", -1), ("text1y", 70), ("text1font", "&Caveat_VariableFont_wght20pt7b"),
+        ("text2x", -1), ("text2y", 87), ("text2font", "&Caveat_VariableFont_wght10pt7b"),
     ]
 
 

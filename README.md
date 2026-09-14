@@ -66,7 +66,7 @@ epaper_watch/
 ├── RTCManager.h            # Time management
 │
 ├── myfonts/                # Custom GFX fonts (66 fonts)
-├── mywatchfaces/           # Watchface definitions (70 watchfaces)
+├── mywatchfaces/           # Watchface definitions (95 watchfaces)
 │
 ├── watchfaceutils/         # Python development tools
 │   ├── configure_watchface.py
