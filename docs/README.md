@@ -187,8 +187,9 @@ Preview of available watchfaces:
 ### Display Issues
 
 **Display not updating**
-- Check SPI connections (MOSI, SCK, CS, DC, RST, BUSY)
+- Check SPI connections (DAT/MOSI→D10, SCL/SCK→D8, CS→D1, DC→D3, RES→D0, GND) — full pinout in [HARDWARE.md](HARDWARE.md)
 - Verify 3.3V power supply
+- Run the standalone diagnostic `hardware/epd_test/epd_test.ino` (BUSY on D9)
 - Try disabling partial refresh: `const bool ENABLE_PARTIAL_REFRESH = false;`
 
 **Display is garbled**

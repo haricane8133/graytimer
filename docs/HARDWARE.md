@@ -20,18 +20,29 @@ Detailed hardware information for the e-paper watch project.
 
 ### E-Paper Display (SPI)
 
+Breakout boards label the same two SPI lines differently; all names in the
+"EPD Pin" column are equivalent.
+
 ```
-MCU Pin     | Function      | EPD Pin  | Description
-------------|---------------|----------|---------------------------
-D10 (P1.11) | SPI MOSI      | DIN      | Data from MCU to display
-D8  (P1.13) | SPI SCK       | CLK      | SPI clock signal
-D1  (P0.02) | GPIO (CS)     | CS       | Chip select (active low)
-D3  (P0.29) | GPIO (DC)     | DC       | Data/Command selection
-D0  (P0.26) | GPIO (RST)    | RES      | Reset (active low)
-D6  (P1.14) | GPIO (BUSY)   | BUSY     | Busy signal from display
-            | Power         | VCC      | 3.3V from MCU
-            | Ground        | GND      | Common ground
+MCU Pin     | Function      | EPD Pin            | Description
+------------|---------------|--------------------|---------------------------
+D10 (P1.11) | SPI MOSI      | DAT / DIN / SDA    | Data from MCU to display
+D8  (P1.13) | SPI SCK       | SCL / CLK / SCK    | SPI clock signal
+D1  (P0.02) | GPIO (CS)     | CS                 | Chip select (active low)
+D3  (P0.29) | GPIO (DC)     | DC                 | Data/Command selection
+D0  (P0.26) | GPIO (RST)    | RES / RST          | Reset (active low)
+D9  (P1.12) | GPIO (BUSY)   | BUSY               | Busy signal from display (see note)
+            | Power         | VCC / 3V3          | 3.3V from MCU (not 5V)
+            | Ground        | GND                | Common ground
 ```
+
+**BUSY note**: the firmware passes `-1` for BUSY and uses fixed delays instead
+(`myutils.cpp`), so the display works with only the five signal wires plus power.
+BUSY is still wired to **D9** because the diagnostic sketch in
+[`hardware/epd_test/`](../hardware/epd_test/epd_test.ino) needs it, and it can be
+enabled in the firmware by replacing the `-1` with `EPD_BUSY`. BUSY used to be on
+D6; that pin is now buried under epoxy on the Xiao and should be treated as
+unavailable. If the display breakout has a MISO/SDO pin, leave it unconnected.
 
 ### RTC (I2C)
 
@@ -53,7 +64,11 @@ D2  (P1.10) | GPIO (INT)    | SQW/INT  | Optional: interrupt/alarm
 MCU Pin     | Function      | Purpose
 ------------|---------------|--------------------------------
 D7  (P1.15) | GPIO (Button) | User input (future features)
+D2  (P1.10) | GPIO (INT)    | RTC SQW/INT (defined, unused)
 ```
+
+Free / unavailable pins: **D6** (P1.14) is under epoxy — do not plan on it.
+Every other Xiao pin is assigned above.
 
 ---
 
@@ -170,9 +185,16 @@ D7  (P1.15) | GPIO (Button) | User input (future features)
 
 **Display shows nothing**:
 - Check 3.3V power to display
-- Verify all 6 SPI connections
-- Test BUSY pin (should pulse during updates)
+- Verify the 5 signal connections (DAT, SCL, CS, DC, RES) plus GND
+- Flash `hardware/epd_test/epd_test.ino` with BUSY on D9 — it prints the
+  library's diagnostics (`_Update_Full : <µs>` or `Busy Timeout!`)
+- If the RTC is not found the firmware halts *before* touching the display
+  (`setup()` loops forever) — a dead display can really be an RTC wiring fault
 - Try full refresh mode
+
+**Display refreshes (BUSY pulses ~2 s, `_Update_Full` ≈ 2,000,000 µs) but the
+image never changes / shows noise**: the controller is fine but the high-voltage
+boost is not producing its ±15 V rails. See "Repair log" below.
 
 **Display is garbled**:
 - Check SPI connections
@@ -211,6 +233,42 @@ D7  (P1.15) | GPIO (Button) | User input (future features)
 - Verify polarity
 - Test USB charging circuit
 - Check for shorts
+
+---
+
+## Repair log
+
+### September 2026 — display dead after a short with the battery connected
+
+Symptoms: display stuck on random noise, never changed. Findings, in order:
+
+1. Xiao boots, USB works, RTC found and settable → MCU fine.
+2. Pin-walk sketch: all five signal lines reach the breakout header at 3.3 V →
+   wiring and GPIOs fine.
+3. `hardware/epd_test/` with BUSY on D9: `_Update_Full : 2179601` (2.18 s, spec)
+   and no `Busy Timeout!` → the SSD1681 controller on the panel flex accepts
+   commands and runs the refresh waveform.
+4. Probing the breakout during a refresh: switch node pulled to ~0 V for the
+   whole 2 s, **no rail above 2.6 V** on any of the ten HV caps beside the FPC
+   connector. Inductor 0.6 Ω (ok), sense resistor `R47` ≈ 0.5 Ω (ok), no cap
+   shorted with the panel out.
+5. Conclusion: high-voltage boost not running — either the MOSFET no longer
+   switches cleanly or the panel's booster control (GDR / current sense) is
+   damaged. Not distinguishable without a scope; both parts were exposed to
+   the short.
+
+Fix chosen: replace the panel **and** breakout together with a
+**Waveshare 1.54" e-Paper Module (V2)**, black/white, 200×200 (SSD1681). It is
+driven by the same `GxEPD2_154_D67` class, so no firmware change is needed.
+Header mapping: VCC→3V3, GND→GND, DIN→D10, CLK→D8, CS→D1, DC→D3, RST→D0,
+BUSY→D9 (or leave unconnected). Its PCB is 48 × 33 mm, larger than the original
+breakout — check case fit; the raw panel can be lifted off its ZIF connector and
+tried with the old breakout first, in case only the panel was the casualty.
+Note the original GDEH0154D67 is end-of-life; Good Display's successor is the
+GDEY0154D67 (same class).
+
+Also: the LiPo pouch took part in the short and has a visible crease — replace
+it if it puffs.
 
 ---
 

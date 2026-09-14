@@ -7,12 +7,13 @@
 #include "bitmaps/Bitmaps200x200.h"
 
 // E-Paper Display Pin Definitions (GoodDisplay 1.54" - GDEH0154D67)
-#define EPD_MOSI  D10  // SPI MOSI (DAT) - Hardware SPI
-#define EPD_SCK   D8   // SPI Clock (CLK) - Hardware SPI
+#define EPD_MOSI  D10  // SPI MOSI - Hardware SPI (labelled DAT / DIN / SDA on breakouts)
+#define EPD_SCK   D8   // SPI Clock - Hardware SPI (labelled SCL / CLK / SCK on breakouts)
 #define EPD_CS    D1   // Chip Select (CS) - GPIO
 #define EPD_DC    D3   // Data/Command (DC) - GPIO
 #define EPD_RST   D0   // Reset (RES) - GPIO
-#define EPD_BUSY  D6   // Busy Signal (BUSY) - GPIO (was D5 in breakout board, moved to free I2C)
+#define EPD_BUSY  D9   // Busy Signal (BUSY) - GPIO. Wired but NOT used by the firmware (see myutils.cpp).
+                       // Was D6; D6 is now buried under epoxy on the Xiao, so BUSY moved to D9.
 
 // RTC (DS3231) Pin Definitions
 // Using default hardware I2C pins (no Wire.begin(SDA,SCL) needed)

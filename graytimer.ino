@@ -1,6 +1,12 @@
 #include "myutils.h"
 
 // ==================== CONFIGURATION ====================
+// Serial time setup: on boot the watch waits 15 s for a line on the Serial
+// Monitor (115200 baud) in the format  YYYY,MM,DD,HH,MM,SS  (24-hour clock),
+// e.g.  2026,9,14,17,30,0  -> 14 Sep 2026, 5:30:00 PM.  Send with a newline.
+// No input within 15 s -> keeps the current RTC time.  Serial.begin() only runs
+// when ENABLE_SERIAL_DEBUG is true, so enable both, set the time, then set both
+// back to false and re-flash for deployment.
 const bool ENABLE_TIME_SETUP = false;  // Enable serial time input on boot
 const bool ENABLE_PARTIAL_REFRESH = true;  // Enable partial refresh for faster updates
 const uint8_t FULL_REFRESH_INTERVAL = 10;  // Full refresh when minute % N == 0 (e.g., :00, :10, :20, etc.)

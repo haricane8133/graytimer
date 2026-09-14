@@ -1,7 +1,9 @@
 #include "myutils.h"
 
 // HACK: Pass -1 for BUSY pin to disable busy waiting (fixes 10s timeout issue)
-// The display works fine without busy checking, we just use fixed delays
+// The display works fine without busy checking, we just use fixed delays.
+// BUSY is physically wired to EPD_BUSY (D9); to monitor it instead, replace the
+// -1 below with EPD_BUSY (hardware/epd_test/ shows the library's diag output).
 GxEPD2_BW<GxEPD2_154_D67, GxEPD2_154_D67::HEIGHT> display(
   GxEPD2_154_D67(EPD_CS, EPD_DC, EPD_RST, -1)
 ); // GDEH0154D67 200x200, SSD1681
