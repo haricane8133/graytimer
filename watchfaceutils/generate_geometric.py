@@ -35,6 +35,7 @@ class Canvas:
         self.d = ImageDraw.Draw(self.img)
         self.ink = 255 if black_bg else 0
         self.paper = 0 if black_bg else 255
+        self.exact = None  # optional 1:1 layer for pre-dithered bitmaps (bypasses supersampling)
 
     def _s(self, v):
         return v * SS
@@ -124,6 +125,18 @@ class Canvas:
         y = int((box[1] + (bh - im.height / SS) / 2) * SS)
         self.img.paste(self.ink, (x, y), mask)
 
+    def bitmap(self, path, box):
+        """Composite a pre-dithered 1-bit PNG (black = ink) 1:1, centred in box=(x0,y0,x1,y1).
+        Dither patterns must not be resampled, so this lands on a 200px layer merged in to_bits()."""
+        im = Image.open(path).convert("L")
+        bw, bh = box[2] - box[0], box[3] - box[1]
+        assert im.width <= bw and im.height <= bh, f"{path} is {im.size}, larger than box {box}"
+        if self.exact is None:
+            self.exact = Image.new("L", (W, W), 255)
+        x = box[0] + (bw - im.width) // 2
+        y = box[1] + (bh - im.height) // 2
+        self.exact.paste(0, (x, y), im.point(lambda v: 255 if v < 128 else 0))
+
     def text(self, txt, font_path, size, center, index=0):
         """Draw text from a system/TTF font, centred at `center`."""
         f = ImageFont.truetype(font_path, int(size * SS), index=index)
@@ -132,6 +145,8 @@ class Canvas:
 
     def to_bits(self):
         small = self.img.resize((W, W), Image.LANCZOS)
+        if self.exact is not None:
+            small = Image.composite(Image.new("L", (W, W), self.ink), small, self.exact.point(lambda v: 255 if v < 128 else 0))
         bw = small.point(lambda v: 0 if v < 128 else 255, "1")
         return bw
 
@@ -1036,7 +1051,7 @@ def whale():
 
 
 # ---------------------------------------------------------------------------
-# Batch 4 - Horizon Zero Dawn machines (silhouettes from sources/hzd) + more clip art
+# Batch 4 - Horizon Zero Dawn machines (dithered renders from sources/hzd) + more clip art
 # ---------------------------------------------------------------------------
 
 HZD_TIME = [("text1font", "&Orbitron_Bold15pt7b")]
@@ -1046,43 +1061,43 @@ HZD_DATE = [("text2font", "&Orbitron_Bold10pt7b")]
 @face
 def thunderjaw():
     c = Canvas()
-    c.silhouette(SRC_DIR / "hzd/thunderjaw.png", (2, 84, 198, 198))
+    c.bitmap(SRC_DIR / "hzd/thunderjaw.png", (2, 84, 198, 198))
     return c, [("layout", 1), ("text1x", -1), ("text1y", 8)] + HZD_TIME + [("text2x", -1), ("text2y", 26)] + HZD_DATE
 
 
 @face
 def watcher():
     c = Canvas()
-    c.silhouette(SRC_DIR / "hzd/watcher.png", (56, 40, 198, 190), flip=True)
+    c.bitmap(SRC_DIR / "hzd/watcher.png", (56, 40, 198, 190))
     return c, [("layout", 1), ("text1x", 4), ("text1y", 5)] + HZD_TIME + [("text2x", 4), ("text2y", 86)] + HZD_DATE
 
 
 @face
 def sawtooth():
     c = Canvas()
-    c.silhouette(SRC_DIR / "hzd/sawtooth.png", (50, 56, 198, 198))
+    c.bitmap(SRC_DIR / "hzd/sawtooth.png", (50, 56, 198, 198))
     return c, [("layout", 1), ("text1x", 4), ("text1y", 5)] + HZD_TIME + [("text2x", 4), ("text2y", 22)] + HZD_DATE
 
 
 @face
 def stormbird():
     c = Canvas()
-    c.silhouette(SRC_DIR / "hzd/stormbird.png", (30, 2, 170, 144))
+    c.bitmap(SRC_DIR / "hzd/stormbird.png", (30, 2, 170, 144))
     return c, [("layout", 1), ("text1x", -1), ("text1y", 75)] + HZD_TIME + [("text2x", -1), ("text2y", 90)] + HZD_DATE
 
 
 @face
 def strider():
     c = Canvas()
-    c.silhouette(SRC_DIR / "hzd/strider.png", (16, 66, 184, 198))
+    c.bitmap(SRC_DIR / "hzd/strider.png", (16, 66, 184, 198))
     return c, [("layout", 1), ("text1x", -1), ("text1y", 8)] + HZD_TIME + [("text2x", -1), ("text2y", 26)] + HZD_DATE
 
 
 @face
 def vader():
-    """Darth Vader helmet (from sources/sw/vader.png)."""
+    """Darth Vader helmet (dithered photo, sources/sw/vader.png)."""
     c = Canvas()
-    c.silhouette(SRC_DIR / "sw/vader.png", (30, 2, 170, 150))
+    c.bitmap(SRC_DIR / "sw/vader.png", (30, 2, 170, 150))
     return c, [
         ("layout", 1), ("noAMPM", "true"),
         ("text1x", -1), ("text1y", 77), ("text1font", "&StarJedi_DGRW20pt7b"),
@@ -1092,9 +1107,9 @@ def vader():
 
 @face
 def mando():
-    """Mandalorian helmet (from sources/sw/mando.png)."""
+    """Mandalorian helmet (dithered photo, sources/sw/mando.png)."""
     c = Canvas()
-    c.silhouette(SRC_DIR / "sw/mando.png", (10, 8, 190, 150))
+    c.bitmap(SRC_DIR / "sw/mando.png", (10, 8, 190, 150))
     return c, [
         ("layout", 1), ("noAMPM", "true"),
         ("text1x", -1), ("text1y", 77), ("text1font", "&StarJedi_DGRW20pt7b"),
