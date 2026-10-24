@@ -1,18 +1,23 @@
 #include "myutils.h"
 
+// systemOff() and readResetReason() come from the Adafruit-based Seeed nRF52 core.
+#if !defined(ARDUINO_ARCH_NRF52)
+#error "Select Tools > Board > Seeed nRF52 Boards > Seeed XIAO nRF52840 (not the mbed 'XIAO nRF52840 (No Updates)' board)"
+#endif
+
 // ==================== CONFIGURATION ====================
-const bool ENABLE_TIME_SETUP = false;  // Enable serial time input on boot
+// Serial time setup: on a cold boot (power-on, reset button, fresh upload; not
+// the per-minute RTC wake) the watch waits 15 s for a line on the Serial
+// Monitor (115200 baud) in the format  YYYY,MM,DD,HH,MM,SS  (24-hour clock),
+// e.g.  2026,9,14,17,30,0  -> 14 Sep 2026, 5:30:00 PM.  Send with a newline.
+// No input within 15 s -> keeps the current RTC time.  Serial.begin() only runs
+// when ENABLE_SERIAL_DEBUG is true, so enable both, set the time, then set both
+// back to false and re-flash for deployment.
+const bool ENABLE_TIME_SETUP = false;  // Enable serial time input on cold boot
 const bool ENABLE_PARTIAL_REFRESH = true;  // Enable partial refresh for faster updates
 const uint8_t FULL_REFRESH_INTERVAL = 10;  // Full refresh when minute % N == 0 (e.g., :00, :10, :20, etc.)
 const bool ENABLE_WATCHFACE_CYCLING = true;  // Auto-cycle through watchfaces every 10 mins
 const bool ENABLE_SERIAL_DEBUG = false;  // Disable Serial to save ~1-2mA power (set false for deployment)
-
-// Smart polling strategy for battery optimization
-const uint16_t POLL_INTERVAL_MS = 200;      // Poll every 200ms during active window
-const uint8_t WAKE_BEFORE_MINUTE_SEC = 57;  // Wake at second 57 (3-second polling window)
-                                            // Range: 50-57 recommended (10s-3s window)
-                                            // Lower = more battery, higher = safer
-                                            // Changed from 55 to 57 for better battery (2s more sleep)
 
 // Serial debug macros (only print if enabled)
 #define DEBUG_PRINT(x) if(ENABLE_SERIAL_DEBUG) Serial.print(x)
@@ -22,10 +27,7 @@ const uint8_t WAKE_BEFORE_MINUTE_SEC = 57;  // Wake at second 57 (3-second polli
 // Global RTC manager
 RTCManager rtcManager;
 
-// Track last displayed minute to detect changes
-uint8_t lastDisplayedMinute = 255;  // Force first update
 bool displayInitialized = false;  // Track if display has been initialized
-bool firstUpdate = true;  // Track first update to force full refresh
 
 // Watchface cycling - array of all available watchfaces
 WatchFace* allWatchFaces[] = {
@@ -130,6 +132,8 @@ WatchFace* allWatchFaces[] = {
   new WatchFace_hari()
 };
 const uint8_t NUM_WATCHFACES = sizeof(allWatchFaces) / sizeof(allWatchFaces[0]);
+static_assert(sizeof(allWatchFaces) / sizeof(allWatchFaces[0]) <= 128,
+              "face index is saved in 7 bits of RTC RAM");
 uint8_t currentWatchFaceIndex = 0;
 WatchFace* currentWatchFace = allWatchFaces[currentWatchFaceIndex];
 
@@ -162,15 +166,24 @@ uint8_t pickNextWatchFace(uint8_t current) {
 }
 
 /**
- * Setup - runs once on power-on
+ * Setup - runs on every boot. The watch spends almost all its time in System OFF
+ * (~0.4µA nRF52840 + ~0.24µA RV-8803); the RV-8803 pulls INT (D2) low at every
+ * minute rollover, which resets the chip into setup() again. So each pass here
+ * is one minute's work: read time, refresh display, go back to System OFF.
+ *
+ * Cold boot (power-on, reset button, upload): optional serial time setup,
+ * random watchface, full refresh. Wake from System OFF: same watchface as last
+ * minute (saved in RTC RAM), partial refresh, new face + full refresh at :00, :10, ...
  */
 void setup() {
+  bool wokeFromSleep = readResetReason() & POWER_RESETREAS_OFF_Msk;
+
   if (ENABLE_SERIAL_DEBUG) {
     Serial.begin(115200);
-    while (!Serial) delay(10);
+    if (!wokeFromSleep) while (!Serial) delay(10);  // USB won't enumerate in time on a wake
   }
 
-  DEBUG_PRINTLN("\n=== E-Paper Watch ===");
+  DEBUG_PRINTLN(wokeFromSleep ? "\n=== E-Paper Watch (wake) ===" : "\n=== E-Paper Watch ===");
 
   // Initialize RTC
   if (!rtcManager.begin()) {
@@ -178,101 +191,76 @@ void setup() {
     while (1) delay(1000);
   }
 
-  // Pick a random initial watchface (hardware RNG, no seeding needed)
-  currentWatchFaceIndex = hwRandom(NUM_WATCHFACES);
+  int savedFace = rtcManager.loadFaceIndex();
+  bool coldStart = !wokeFromSleep || savedFace < 0 || savedFace >= NUM_WATCHFACES;
 
+  if (coldStart) {
+    if (rtcManager.lostPower()) {
+      DEBUG_PRINTLN("WARNING: RTC lost power, time may be incorrect!");
+    }
+
+    // Optional: Set time via Serial
+    if (ENABLE_TIME_SETUP) {
+      rtcManager.setupTimeViaSerial();
+    }
+
+    // Pick a random initial watchface (hardware RNG, no seeding needed)
+    currentWatchFaceIndex = hwRandom(NUM_WATCHFACES);
+    DEBUG_PRINT("Initial random watchface #");
+  } else {
+    currentWatchFaceIndex = savedFace;
+    DEBUG_PRINT("Resuming watchface #");
+  }
   currentWatchFace = allWatchFaces[currentWatchFaceIndex];
-  DEBUG_PRINT("Initial random watchface #");
   DEBUG_PRINTLN(currentWatchFaceIndex);
 
-  // Optional: Set time via Serial
-  if (ENABLE_TIME_SETUP) {
-    rtcManager.setupTimeViaSerial();
-  }
+  // Clear the flag first, then read the time: a minute that rolls over while
+  // the display refreshes sets the flag again, and we redraw for it.
+  bool forceFull = coldStart;
+  uint8_t passes = 0;  // cap in case a bad I2C read keeps reporting the flag
+  do {
+    rtcManager.clearMinuteInterrupt();
+    rtcManager.refresh();
+    updateDisplay(forceFull, coldStart);
+    forceFull = false;
+  } while (rtcManager.minuteInterruptPending() && ++passes < 3);
 
-  // Initial display update
-  DEBUG_PRINTLN("Initializing display...");
-  updateDisplay();
-  lastDisplayedMinute = rtcManager.getCurrentMinute();
-
-  DEBUG_PRINTLN("Watch ready!");
-  DEBUG_PRINT("Smart polling: Sleep until :");
-  DEBUG_PRINT(WAKE_BEFORE_MINUTE_SEC);
-  DEBUG_PRINT("s, then poll every ");
-  DEBUG_PRINT(POLL_INTERVAL_MS);
-  DEBUG_PRINTLN("ms");
+  rtcManager.saveFaceIndex(currentWatchFaceIndex);
+  goToSleep();
 }
 
 /**
- * Smart polling loop - optimized for battery life with NO DRIFT
- *
- * Strategy (drift-proof):
- * 1. After display update, check current second
- * 2. Calculate safe sleep time (to wake at WAKE_BEFORE_MINUTE_SEC)
- * 3. Sleep until configured wake second
- * 4. Poll every POLL_INTERVAL_MS until minute changes
- * 5. Repeat
- *
- * This ensures we ALWAYS catch the minute change
- * Power consumption: ~200-500µA average
+ * Never reached: setup() always ends in System OFF, and the next RTC tick
+ * starts over at setup().
  */
 void loop() {
-  uint8_t currentMinute = rtcManager.getCurrentMinute();
-
-  // Check if minute changed
-  if (currentMinute != lastDisplayedMinute) {
-    DEBUG_PRINT("Minute ");
-    DEBUG_PRINT(lastDisplayedMinute);
-    DEBUG_PRINT(" → ");
-    DEBUG_PRINTLN(currentMinute);
-
-    updateDisplay();
-    lastDisplayedMinute = currentMinute;
-
-    // Get current second to calculate sleep duration
-    DateTime now = rtcManager.rtc.now();
-    uint8_t currentSecond = now.second();
-
-    // Calculate how long to sleep to wake up at WAKE_BEFORE_MINUTE_SEC
-    // We want to wake a few seconds before the minute changes to start polling
-    uint16_t sleepSeconds;
-    if (currentSecond < WAKE_BEFORE_MINUTE_SEC) {
-      // If we're before wake time, sleep until wake second
-      sleepSeconds = WAKE_BEFORE_MINUTE_SEC - currentSecond;
-    } else {
-      // If we're after wake time, sleep until next minute's wake second
-      sleepSeconds = (60 - currentSecond) + WAKE_BEFORE_MINUTE_SEC;
-    }
-
-    // Sleep for calculated duration (minus 1 second for safety)
-    if (sleepSeconds > 1) {
-      sleepSeconds -= 1;  // Wake up 1 second early to be safe
-      DEBUG_PRINT("Sleeping for ");
-      DEBUG_PRINT(sleepSeconds);
-      DEBUG_PRINTLN(" seconds...");
-      DEBUG_FLUSH();
-      delay(sleepSeconds * 1000);
-    }
-
-    // Now we're at approximately WAKE_BEFORE_MINUTE_SEC
-    // Poll every POLL_INTERVAL_MS until minute changes
-    DEBUG_PRINT("Active polling (");
-    DEBUG_PRINT(POLL_INTERVAL_MS);
-    DEBUG_PRINTLN("ms) - waiting for minute change");
-  }
-
-  // Active polling mode - check every POLL_INTERVAL_MS
-  // This catches the minute change quickly
-  delay(POLL_INTERVAL_MS);
 }
 
 /**
- * Update e-paper display with current time from RTC
+ * Enter System OFF until the RV-8803 pulls INT low at the next minute.
+ * RAM and the CPU are powered down; waking is a reset. Pins keep their
+ * configured levels, so the display's CS/RST stay driven high while it
+ * hibernates. If INT is already low here, the chip wakes straight away,
+ * so a minute that slips in after the last check is not lost.
  */
-void updateDisplay() {
-  // Initialize display ONLY ONCE on first call
+void goToSleep() {
+  DEBUG_PRINTLN("System OFF until next minute");
+  DEBUG_FLUSH();
+  systemOff(RTC_INTERRUPT_PIN, LOW);
+}
+
+/**
+ * Update e-paper display with the time from the last rtcManager.refresh()
+ *
+ * forceFull:   full refresh regardless of the minute (cold boot)
+ * initialBoot: the panel content is unknown, so GxEPD2 must not assume the
+ *              previous frame is still in controller RAM. On a wake the panel
+ *              kept it through hibernate, so partial refresh works.
+ */
+void updateDisplay(bool forceFull, bool initialBoot) {
+  // Initialize display ONLY ONCE per boot
   if (!displayInitialized) {
-    display.init(115200, true, 2, false);
+    display.init(ENABLE_SERIAL_DEBUG ? 115200 : 0, initialBoot, 2, false);
     display.setRotation(0);
     displayInitialized = true;
   }
@@ -286,10 +274,11 @@ void updateDisplay() {
   bool isFullRefreshTime = (currentMinute % FULL_REFRESH_INTERVAL == 0);
 
   // Cycle to random watchface if enabled and it's full refresh time
-  if (ENABLE_WATCHFACE_CYCLING && isFullRefreshTime && !firstUpdate) {
+  if (ENABLE_WATCHFACE_CYCLING && isFullRefreshTime && !forceFull) {
     // Independent uniform draw each time, excluding only the face on screen now
     currentWatchFaceIndex = pickNextWatchFace(currentWatchFaceIndex);
     currentWatchFace = allWatchFaces[currentWatchFaceIndex];
+    timeStr = rtcManager.getFormattedTime(!currentWatchFace->noAMPM);
     DEBUG_PRINT("Random watchface #");
     DEBUG_PRINT(currentWatchFaceIndex);
     DEBUG_PRINT(" (");
@@ -298,15 +287,11 @@ void updateDisplay() {
   }
 
   // Determine refresh mode
-  // FULL refresh: First update OR every 10 minutes (for ghosting prevention)
+  // FULL refresh: cold boot OR every 10 minutes (for ghosting prevention)
   // PARTIAL refresh: All other times (faster, no flicker)
   bool usePartialRefresh = ENABLE_PARTIAL_REFRESH &&
-                          !firstUpdate &&
+                          !forceFull &&
                           !isFullRefreshTime;
-
-  if (firstUpdate) {
-    firstUpdate = false;
-  }
 
   unsigned long startTime = millis();
 

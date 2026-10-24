@@ -26,8 +26,8 @@
 ### Hardware Requirements
 
 - **MCU**: Seeed Xiao nRF52840
-- **Display**: GoodDisplay 1.54" (GDEH0154D67)
-- **RTC**: DS3231 with backup battery
+- **Display**: GoodDisplay 1.54" (GDEH0154D67 / GDEY0154D67) on a GoodDisplay DESPI-C02 adapter
+- **RTC**: RV-8803 (SmartElex module), INT wired to D2 to wake the MCU from System OFF
 - **Battery**: LiPo 3.7V (300-500mAh recommended)
 
 **[📋 Detailed Hardware Guide →](docs/HARDWARE.md)**
@@ -40,26 +40,29 @@
    - Preferences → Additional Board URLs
    - Add: `https://files.seeedstudio.com/arduino/package_seeeduino_boards_index.json`
    - Tools → Board → Boards Manager → Search "Seeed nRF52" → Install
-   - Initially had the idea of using NFC for changing watchface and setting time. So this micro controller was chosen. But we later found out that NFC tag type 4, which is required for receiving NDEF NFC records weren't supported by the arduino libraries.
 
 3. **Install Required Libraries** (via Library Manager)
    - GxEPD2 by Jean-Marc Zingg
    - Adafruit GFX Library
-   - RTClib by Adafruit
+   - SparkFun Qwiic RTC RV8803 Arduino Library
+
+4. **Build and upload** with the board *Seeed XIAO nRF52840* from a terminal, not the
+   IDE's Upload button: see [Programming](docs/HARDWARE.md#programming).
 
 **[📖 Complete API Reference →](docs/API.md)**
 
 ### Hardware
 
-The `/hardware` folder contains the designs to 3D print for the watch case
+The `/hardware` folder contains the designs to 3D print for the watch case, plus
+two bring-up sketches: `epd_test/` (display) and `rtc_test/` (RTC and deep-sleep wake).
 
 ---
 
 ## Project Structure
 
 ```
-epaper_watch/
-├── epaper_watch.ino        # Main sketch
+graytimer/
+├── graytimer.ino           # Main sketch
 ├── myutils.h               # Headers and includes
 ├── myutils.cpp             # Display rendering logic
 ├── WatchFace.h             # WatchFace class definition
@@ -68,6 +71,7 @@ epaper_watch/
 ├── myfonts/                # Custom GFX fonts (66 fonts)
 ├── mywatchfaces/           # Watchface definitions (95 watchfaces)
 │
+├── hardware/               # Case models, epd_test/ and rtc_test/ sketches
 ├── watchfaceutils/         # Python development tools
 │   ├── configure_watchface.py
 │   ├── render_watchface.py

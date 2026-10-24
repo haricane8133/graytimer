@@ -1,9 +1,11 @@
 #include "myutils.h"
 
-// HACK: Pass -1 for BUSY pin to disable busy waiting (fixes 10s timeout issue)
-// The display works fine without busy checking, we just use fixed delays
+// BUSY lets GxEPD2 return as soon as the panel finishes instead of sleeping
+// through worst-case fixed delays, which shortens every wake. If BUSY
+// misbehaves, pass -1 here to fall back to fixed delays (hardware/epd_test/
+// prints BUSY timings).
 GxEPD2_BW<GxEPD2_154_D67, GxEPD2_154_D67::HEIGHT> display(
-  GxEPD2_154_D67(EPD_CS, EPD_DC, EPD_RST, -1)
+  GxEPD2_154_D67(EPD_CS, EPD_DC, EPD_RST, EPD_BUSY)
 ); // GDEH0154D67 200x200, SSD1681
 
 void drawWatchFace(

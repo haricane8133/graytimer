@@ -8,9 +8,10 @@ Detailed hardware information for the e-paper watch project.
 
 | Component | Specification | Notes |
 |-----------|---------------|-------|
-| MCU | Seeed Xiao nRF52840 Sense | Nordic nRF52840, 64MHz, 1MB Flash, 256KB RAM, BLE 5.0 |
+| MCU | Seeed Xiao nRF52840 | Nordic nRF52840, 64MHz, 1MB Flash, 256KB RAM, BLE 5.0 |
 | Display | GoodDisplay GDEH0154D67 | 1.54", 200×200, SPI, partial refresh capable |
-| RTC | DS3231 Module | I2C, ±3.5ppm, integrated TCXO, backup battery |
+| Display adapter | GoodDisplay DESPI-C02 | 24-pin FPC breakout with the high-voltage boost; RESE switch |
+| RTC | SmartElex RV-8803 module | I2C, ±3ppm temperature compensated, 0.24µA, INT wakes the MCU, onboard backup cell |
 | Battery | LiPo 3.7V | Recommend 300-500mAh, JST connector |
 | Button | Tactile switch (optional) | For future features |
 
@@ -20,18 +21,28 @@ Detailed hardware information for the e-paper watch project.
 
 ### E-Paper Display (SPI)
 
+Breakout boards label the same two SPI lines differently; all names in the
+"EPD Pin" column are equivalent.
+
 ```
-MCU Pin     | Function      | EPD Pin  | Description
-------------|---------------|----------|---------------------------
-D10 (P1.11) | SPI MOSI      | DIN      | Data from MCU to display
-D8  (P1.13) | SPI SCK       | CLK      | SPI clock signal
-D1  (P0.02) | GPIO (CS)     | CS       | Chip select (active low)
-D3  (P0.29) | GPIO (DC)     | DC       | Data/Command selection
-D0  (P0.26) | GPIO (RST)    | RES      | Reset (active low)
-D6  (P1.14) | GPIO (BUSY)   | BUSY     | Busy signal from display
-            | Power         | VCC      | 3.3V from MCU
-            | Ground        | GND      | Common ground
+MCU Pin     | Function      | EPD Pin            | Description
+------------|---------------|--------------------|---------------------------
+D10 (P1.15) | SPI MOSI      | DAT / DIN / SDA    | Data from MCU to display
+D8  (P1.13) | SPI SCK       | SCL / CLK / SCK    | SPI clock signal
+D1  (P0.03) | GPIO (CS)     | CS                 | Chip select (active low)
+D3  (P0.29) | GPIO (DC)     | DC                 | Data/Command selection
+D0  (P0.02) | GPIO (RST)    | RES / RST          | Reset (active low)
+D9  (P1.14) | GPIO (BUSY)   | BUSY               | Busy signal from display
+            | Power         | VCC / 3V3          | 3.3V from MCU (not 5V)
+            | Ground        | GND                | Common ground
 ```
+
+DESPI-C02 labels: SDI = MOSI (D10), SCK = SCK (D8), RES = RST (D0), D/C = DC (D3).
+
+**BUSY note**: the firmware reads BUSY on **D9** so each wake ends as soon as the
+panel finishes instead of sleeping through worst-case fixed delays. If BUSY
+misbehaves, pass `-1` for it in `myutils.cpp` to fall back to fixed delays.
+If the display breakout has a MISO/SDO pin, leave it unconnected.
 
 ### RTC (I2C)
 
@@ -39,21 +50,40 @@ D6  (P1.14) | GPIO (BUSY)   | BUSY     | Busy signal from display
 MCU Pin     | Function      | RTC Pin  | Description
 ------------|---------------|----------|---------------------------
 D4  (P0.04) | I2C SDA       | SDA      | I2C data line
-D5  (P0.05) | I2C SCL       | SCL      | I2C clock line
-D2  (P1.10) | GPIO (INT)    | SQW/INT  | Optional: interrupt/alarm
-            | Power         | VCC      | 3.3V from MCU
+D6  (P1.11) | I2C SCL       | SCL      | I2C clock line (see note)
+D2  (P0.28) | GPIO (INT)    | INT      | Minute pulse, wakes MCU from System OFF
+            | Power         | 3V3      | 3.3V from MCU
             | Ground        | GND      | Common ground
+            | —             | EVI      | Not connected (event input, unused)
+            | —             | CLKOUT   | Not connected
+            | —             | CLKOE    | Not connected (see note)
 ```
 
-**Note**: RTC module should have backup coin cell battery (CR2032) for timekeeping during power loss.
+**SCL is on D6, not the Xiao's default D5.** The firmware sets the pins with
+`Wire.setPins(RTC_SDA, RTC_SCL)`; to use another pin, change `RTC_SCL` in `myutils.h`.
+
+**Notes** (from the SparkFun RV-8803 Qwiic design, which the SmartElex board
+appears to follow — check against your board):
+- **Cut the power-LED jumper** ("LED"). The LED sits on 3V3 and draws on the
+  order of a milliamp, more than everything else in the watch put together.
+- CLKOE is pulled to GND by a 100k resistor on the board, so the 32 kHz CLKOUT
+  is already off. Leave it unconnected; tying it high would waste current.
+- INT is open-drain with a 100k pull-up on the board.
+- The backup coin cell on the back keeps time while the LiPo is flat or
+  disconnected. If it ever runs down too, the RV-8803 sets its V2F flag and
+  the time must be set again over serial.
+- The board's 4.7k I2C pull-ups ("I2C" jumper) are the only ones on the bus;
+  leave them in.
 
 ### Optional Peripherals
 
 ```
 MCU Pin     | Function      | Purpose
 ------------|---------------|--------------------------------
-D7  (P1.15) | GPIO (Button) | User input (future features)
+D7  (P1.12) | GPIO (Button) | User input (future features)
 ```
+
+Free pin: **D5** (P0.05). Every other Xiao pin is assigned above.
 
 ---
 
@@ -69,7 +99,7 @@ D7  (P1.15) | GPIO (Button) | User input (future features)
        ├─────────► nRF52840 (onboard regulator → 3.3V)
        │                │
        │                ├─────────► E-Paper Display (3.3V)
-       │                ├─────────► DS3231 RTC (3.3V)
+       │                ├─────────► RV-8803 RTC (3.3V)
        │                └─────────► Peripherals
        │
        └─────────► Charging Circuit (USB-C on Xiao)
@@ -82,7 +112,7 @@ D7  (P1.15) | GPIO (Button) | User input (future features)
 ### nRF52840
 - Operating Voltage: 3.3V (regulated from battery)
 - Active Current: ~5mA
-- Sleep Current: ~50µA (with RTC)
+- System OFF: ~0.4µA (RAM off, woken by a GPIO edge as a reset)
 - Flash: 1MB
 - RAM: 256KB
 
@@ -94,27 +124,33 @@ D7  (P1.15) | GPIO (Button) | User input (future features)
 - Resolution: 200×200 pixels (1-bit)
 - Size: 1.54 inches
 
-### DS3231 RTC
+### RV-8803 RTC
 - Operating Voltage: 3.3V
-- Active Current: ~200µA
-- Backup Current: ~3µA (from coin cell)
+- Timekeeping Current: ~0.24µA
 - Temperature Range: -40°C to +85°C
-- Accuracy: ±3.5ppm (±2 minutes per year)
+- Accuracy: ±3ppm temperature compensated (±1.6 minutes per year)
 
 ---
 
 ## Power Consumption
 
+The watch sits in nRF52840 System OFF. At every minute rollover the RV-8803
+pulls INT (D2) low, which resets the chip into `setup()`; it reads the time,
+refreshes the display, hibernates it, clears the RTC flag and goes back to
+System OFF. The watchface index survives in the RV-8803's user RAM register.
+
+Estimates (not yet measured):
+
 | Mode | Current | Duty Cycle | Average |
 |------|---------|------------|---------|
-| nRF52840 Sleep | 50µA | 95% | 47.5µA |
-| nRF52840 Active | 1mA | 5% | 50µA |
-| Display Partial | 5mA | 0.4% | 20µA |
-| Display Full | 8mA | 0.04% | 3.2µA |
-| RTC Always On | 200µA | 100% | 200µA |
-| **Total** | | | **~320µA** |
+| Sleep floor (nRF System OFF, RTC, panel deep sleep, regulator, flash standby) | ~3–10µA | ~98% | ~3–10µA |
+| Wake + partial refresh, 9 of every 10 minutes | ~5mA for ~0.7s | 1.1% | ~55µA |
+| Wake + full refresh, every 10th minute | ~5mA for ~2.5s | 0.4% | ~20µA |
+| **Total** | | | **~80–90µA** |
 
-**Real-world measurements**: 200-500µA depending on configuration and temperature
+The display refreshes are now almost the whole budget, so the remaining levers
+are fewer refreshes (e.g. `FULL_REFRESH_INTERVAL`) rather than sleep current.
+Each wake also spends ~0.5 s in the bootloader before `setup()` runs.
 
 ---
 
@@ -158,9 +194,15 @@ D7  (P1.15) | GPIO (Button) | User input (future features)
 2. **Check polarity** of battery and power connections
 3. **Verify voltage** is 3.3V at all component inputs
 4. **Secure connections** - loose wires cause intermittent issues
-5. **RTC backup battery** - ensure CR2032 is installed correctly
-6. **Display ribbon cable** - handle carefully, easy to damage
-7. **Button debouncing** - add 100nF capacitor if implementing button
+5. **RTC power LED** - cut the RV-8803 board's LED jumper before closing the case
+6. **Display ribbon cable** - handle carefully, easy to damage. The DESPI-C02
+   connector contacts both faces, so a flipped ribbon still connects but with
+   the pin order reversed. Match pin 1 (or the orientation the panel had on its
+   original board) before powering, then confirm with `hardware/epd_test/`:
+   about 2.18 s per full refresh means it is seated correctly. Keep case edges
+   off the two glass corners beside the ribbon.
+7. **DESPI-C02 RESE switch** - start at 0.47Ω
+8. **Button debouncing** - add 100nF capacitor if implementing button
 
 ---
 
@@ -170,9 +212,20 @@ D7  (P1.15) | GPIO (Button) | User input (future features)
 
 **Display shows nothing**:
 - Check 3.3V power to display
-- Verify all 6 SPI connections
-- Test BUSY pin (should pulse during updates)
+- Verify the 5 signal connections (DAT, SCL, CS, DC, RES) plus GND
+- Flash `hardware/epd_test/epd_test.ino` with BUSY on D9 — it prints the
+  library's diagnostics (`_Update_Full : <µs>` or `Busy Timeout!`)
+- If the RTC is not found the firmware halts *before* touching the display
+  (`setup()` loops forever) — a dead display can really be an RTC wiring fault
 - Try full refresh mode
+
+**`epd_test` prints `_Update_Full : 0`**: the panel controller is not answering.
+The ribbon is reversed or not seated (see the ribbon note in Assembly Notes).
+
+**`_Update_Full` ≈ 2,180,000 µs but the image never changes**: the controller
+works but the high voltage does not reach the ink. Try the DESPI-C02 RESE switch
+in its other position; otherwise the panel is damaged (check the glass corners
+next to the ribbon for chips or cracks).
 
 **Display is garbled**:
 - Check SPI connections
@@ -189,18 +242,26 @@ D7  (P1.15) | GPIO (Button) | User input (future features)
 
 **RTC not detected**:
 - Verify I2C connections (SDA, SCL)
-- Check I2C address (0x68)
+- Check I2C address (0x32)
 - Test with I2C scanner
 - Try different RTC module
 
+**Display never updates after the first boot**: INT is not reaching D2, or the
+RV-8803 lost its settings. The firmware re-arms the minute interrupt on every
+boot, so a reset fixes the latter.
+
+**Watch redraws in a tight loop / battery drains fast**: INT is stuck low. The
+firmware clears the update flag before sleeping; check that nothing else pulls
+D2 low.
+
 **Time drifts**:
-- Check temperature (DS3231 has limits)
-- Verify backup battery
+- Check the backup cell on the RTC board
 - Replace RTC module if drift persists
 
 ### Power Issues
 
 **Battery drains quickly**:
+- Cut the RTC board's power LED jumper
 - Disable serial debug
 - Check for shorts
 - Measure current with multimeter
@@ -211,6 +272,30 @@ D7  (P1.15) | GPIO (Button) | User input (future features)
 - Verify polarity
 - Test USB charging circuit
 - Check for shorts
+
+---
+
+## Programming
+
+Board: **Seeed nRF52 Boards → Seeed XIAO nRF52840** (FQBN
+`Seeeduino:nrf52:xiaonRF52840`), not the mbed "XIAO nRF52840 (No Updates)" board.
+
+Build and upload from a terminal. The Arduino IDE 2 runs its build tools with
+`LC_ALL=C`, and the core's `adafruit-nrfutil` refuses to run without a UTF-8
+locale, so IDE Verify/Upload fail on macOS:
+
+```bash
+cd graytimer && LC_ALL=en_US.UTF-8 "/Applications/Arduino IDE.app/Contents/Resources/app/lib/backend/resources/arduino-cli" --config-file ~/.arduinoIDE/arduino-cli.yaml compile --upload -p "$(ls /dev/cu.usbmodem* | head -1)" --fqbn Seeeduino:nrf52:xiaonRF52840 .
+```
+
+The same command builds `hardware/epd_test/` or `hardware/rtc_test/` when run
+from those folders.
+
+The watch spends nearly all its time in System OFF, where USB is not running, so
+the automatic upload (1200-baud touch) cannot reach it. **Double-tap the Xiao's
+reset button** to enter the bootloader first. A cold boot (reset button,
+power-on, upload) waits for the serial time line when `ENABLE_TIME_SETUP` and
+`ENABLE_SERIAL_DEBUG` are on.
 
 ---
 

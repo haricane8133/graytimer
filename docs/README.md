@@ -16,7 +16,7 @@ Complete documentation for the e-paper watch project.
 
 - **Display**: 200×200 monochrome e-paper (1.54", 200 DPI)
 - **Watchfaces**: 95+ pre-configured with custom fonts
-- **Time Keeping**: DS3231 RTC (±2 minutes/year accuracy)
+- **Time Keeping**: RV-8803 RTC (±3ppm), wakes the MCU from System OFF every minute
 - **Refresh Modes**: Partial (fast) and full (ghosting-free)
 - **Development Tools**: Python scripts for creating custom watchfaces
 
@@ -36,31 +36,15 @@ const bool ENABLE_SERIAL_DEBUG = false;      // Disable for battery life
 
 // Timing
 const uint8_t FULL_REFRESH_INTERVAL = 10;    // Minutes (10 = :00, :10, :20...)
-const uint8_t WAKE_BEFORE_MINUTE_SEC = 57;   // Wake at :57s (3s poll window)
-const uint16_t POLL_INTERVAL_MS = 200;       // Poll every 200ms
 ```
 
-### Power Optimization
+### Power
 
-**Maximum Battery Life**:
-```cpp
-const uint8_t WAKE_BEFORE_MINUTE_SEC = 50;  // 10-second window
-const uint16_t POLL_INTERVAL_MS = 300;       // Poll every 300ms
-const bool ENABLE_SERIAL_DEBUG = false;      // Disable serial
-```
-
-**Balanced** - **Default**:
-```cpp
-const uint8_t WAKE_BEFORE_MINUTE_SEC = 57;  // 3-second window
-const uint16_t POLL_INTERVAL_MS = 200;       // Poll every 200ms
-const bool ENABLE_SERIAL_DEBUG = false;      // Disable serial
-```
-
-**Fast Response**:
-```cpp
-const uint8_t WAKE_BEFORE_MINUTE_SEC = 59;  // 1-second window
-const uint16_t POLL_INTERVAL_MS = 100;       // Poll every 100ms
-```
+There is nothing to tune for sleep: the watch sits in nRF52840 System OFF and
+the RV-8803 wakes it once a minute through INT (D2). The display refreshes are
+nearly the whole power budget, so the lever is `FULL_REFRESH_INTERVAL` (full
+refreshes cost ~3× a partial one). Keep `ENABLE_SERIAL_DEBUG = false` for
+deployment. See [Hardware Guide](HARDWARE.md#power-consumption).
 
 ---
 
@@ -187,8 +171,9 @@ Preview of available watchfaces:
 ### Display Issues
 
 **Display not updating**
-- Check SPI connections (MOSI, SCK, CS, DC, RST, BUSY)
+- Check SPI connections (DAT/MOSI→D10, SCL/SCK→D8, CS→D1, DC→D3, RES→D0, GND) — full pinout in [HARDWARE.md](HARDWARE.md)
 - Verify 3.3V power supply
+- Run the standalone diagnostic `hardware/epd_test/epd_test.ino` (BUSY on D9)
 - Try disabling partial refresh: `const bool ENABLE_PARTIAL_REFRESH = false;`
 
 **Display is garbled**
@@ -203,13 +188,13 @@ Preview of available watchfaces:
 ### RTC Issues
 
 **Time is incorrect after upload**
-- Enable time setup: `const bool ENABLE_TIME_SETUP = true;`
-- Upload and open Serial Monitor (115200 baud)
+- Enable time setup: `const bool ENABLE_TIME_SETUP = true;` and `ENABLE_SERIAL_DEBUG = true;`
+- Double-tap reset to enter the bootloader, upload, and open Serial Monitor (115200 baud)
 - Follow prompts to set time
 
 **RTC not detected**
 - Verify I2C connections (SDA, SCL)
-- Check I2C address (0x68)
+- Check I2C address (0x32)
 - Test with I2C scanner
 - Try different RTC module
 
@@ -217,13 +202,12 @@ Preview of available watchfaces:
 
 **Battery drains too quickly**
 1. Disable serial debug: `const bool ENABLE_SERIAL_DEBUG = false;`
-2. Optimize wake time: `const uint8_t WAKE_BEFORE_MINUTE_SEC = 50;`
+2. Cut the power-LED jumper on the RTC board
 3. Check for shorts or bad connections
 4. Measure current with multimeter
 
-**Time updates miss minute changes**
-1. Increase polling window: `const uint8_t WAKE_BEFORE_MINUTE_SEC = 55;`
-2. Decrease poll interval: `const uint16_t POLL_INTERVAL_MS = 100;`
+**Display never updates after the first boot**
+- RV-8803 INT must reach D2; it is what wakes the watch each minute
 
 ### Compilation Errors
 
@@ -263,11 +247,10 @@ RAM (256KB total):        ~23KB used (9%)
 
 | Mode | Current | Notes |
 |------|---------|-------|
-| Deep Sleep | ~50µA | Between polling windows |
-| Active Polling | ~1mA | Last 3 seconds of each minute |
-| Display Partial | ~5mA | 200-500ms duration |
-| Display Full | ~8mA | 1-2s duration every 10 mins |
-| **Average** | **200-500µA** | Typical usage |
+| System OFF | ~3-10µA | nRF52840 off, RV-8803 timing, panel in deep sleep |
+| Display Partial | ~5mA | ~0.7s each minute |
+| Display Full | ~5-8mA | ~2.5s every 10 mins |
+| **Average** | **~80-90µA** | Estimate |
 
 ### Timing
 
@@ -342,7 +325,7 @@ pip3 install Pillow
 |---------------|---------|
 | **MCU** | Nordic nRF52840 (ARM Cortex-M4, 64MHz, 1MB Flash, 256KB RAM) |
 | **Display** | GoodDisplay GDEH0154D67 (1.54", 200×200, SPI, E-Ink) |
-| **RTC** | Maxim DS3231 (I2C, TCXO, ±3.5ppm) |
+| **RTC** | Micro Crystal RV-8803 (I2C, ±3ppm, 0.24µA) |
 | **Power** | 3.7V LiPo, 300-500mAh recommended |
 | **Update Latency** | <3 seconds during watch face refresh |
 | **Refresh Rate** | Partial updates every minute, full every 10 minutes |
