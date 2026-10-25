@@ -7,6 +7,7 @@ Complete documentation for the e-paper watch project.
 ## Documentation Index
 
 - **[Watchface Gallery](GALLERY.md)** - Browse all 95 watchfaces with preview images
+- **[Watchface Catalog](CATALOG.md)** - Face numbers, and how to pick a face or set the time from a phone over NFC
 - **[WatchFace API Reference](API.md)** - Complete API documentation for creating custom watchfaces
 - **[Hardware Guide](HARDWARE.md)** - Detailed hardware specifications, wiring, and assembly
 
@@ -17,6 +18,7 @@ Complete documentation for the e-paper watch project.
 - **Display**: 200×200 monochrome e-paper (1.54", 200 DPI)
 - **Watchfaces**: 95+ pre-configured with custom fonts
 - **Time Keeping**: RV-8803 RTC (±3ppm), wakes the MCU from System OFF every minute
+- **NFC**: a phone writes a face number or the date and time with any NFC tag app; its field wakes the watch
 - **Refresh Modes**: Partial (fast) and full (ghosting-free)
 - **Development Tools**: Python scripts for creating custom watchfaces
 
@@ -26,11 +28,11 @@ Complete documentation for the e-paper watch project.
 
 ### Main Settings
 
-Edit `epaper_watch.ino` to customize behavior:
+Edit `graytimer.ino` to customize behavior:
 
 ```cpp
 // Enable/disable features
-const bool ENABLE_WATCHFACE_CYCLING = true;  // Auto-cycle every 10 mins
+const bool ENABLE_WATCHFACE_CYCLING = true;  // Shuffle mode: new face every 10 mins
 const bool ENABLE_PARTIAL_REFRESH = true;    // Fast updates
 const bool ENABLE_SERIAL_DEBUG = false;      // Disable for battery life
 
@@ -41,7 +43,8 @@ const uint8_t FULL_REFRESH_INTERVAL = 10;    // Minutes (10 = :00, :10, :20...)
 ### Power
 
 There is nothing to tune for sleep: the watch sits in nRF52840 System OFF and
-the RV-8803 wakes it once a minute through INT (D2). The display refreshes are
+the RV-8803 wakes it once a minute through INT (D2), or a phone's NFC field
+wakes it (sensing the field costs next to nothing). The display refreshes are
 nearly the whole power budget, so the lever is `FULL_REFRESH_INTERVAL` (full
 refreshes cost ~3× a partial one). Keep `ENABLE_SERIAL_DEBUG = false` for
 deployment. See [Hardware Guide](HARDWARE.md#power-consumption).
@@ -173,7 +176,7 @@ Preview of available watchfaces:
 **Display not updating**
 - Check SPI connections (DAT/MOSI→D10, SCL/SCK→D8, CS→D1, DC→D3, RES→D0, GND) — full pinout in [HARDWARE.md](HARDWARE.md)
 - Verify 3.3V power supply
-- Run the standalone diagnostic `hardware/epd_test/epd_test.ino` (BUSY on D9)
+- Set `ENABLE_SERIAL_DEBUG = true` to see GxEPD2's refresh diagnostics (BUSY on D9)
 - Try disabling partial refresh: `const bool ENABLE_PARTIAL_REFRESH = false;`
 
 **Display is garbled**

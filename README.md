@@ -2,6 +2,7 @@
 
 * A fully customizable, ePaper, battery-optimized smartwatch.
 * Auto shuffles between available watchfaces every 10 mins.
+* Pick a watchface or set the clock from any phone over NFC, with a generic NFC tag app (no custom app).
 * Make this if you want to build/solder every component rather than building on a compact PCB.
 
 <table>
@@ -17,7 +18,7 @@
   </tr>
 </table>
 
-[Gallery (includes all watchfaces)!](docs/GALLERY.md)
+[Gallery (includes all watchfaces)!](docs/GALLERY.md) · [Catalog: face numbers and NFC commands](docs/CATALOG.md)
 
 ---
 
@@ -29,6 +30,7 @@
 - **Display**: GoodDisplay 1.54" (GDEH0154D67 / GDEY0154D67) on a GoodDisplay DESPI-C02 adapter
 - **RTC**: RV-8803 (SmartElex module), INT wired to D2 to wake the MCU from System OFF
 - **Battery**: LiPo 3.7V (300-500mAh recommended)
+- **NFC antenna**: on the Xiao's NFC pads; a phone's field wakes the watch
 
 **[📋 Detailed Hardware Guide →](docs/HARDWARE.md)**
 
@@ -45,16 +47,17 @@
    - GxEPD2 by Jean-Marc Zingg
    - Adafruit GFX Library
    - SparkFun Qwiic RTC RV8803 Arduino Library
+   - Seeed's [XIAO_nRF52840_NFC](https://github.com/limengdu/XIAO_nRF52840_NFC)
+     (not in Library Manager: Sketch → Include Library → Add .ZIP Library)
 
-4. **Build and upload** with the board *Seeed XIAO nRF52840* from a terminal, not the
-   IDE's Upload button: see [Programming](docs/HARDWARE.md#programming).
+4. **Build and upload** with the board *Seeed XIAO nRF52840*: see
+   [Programming](docs/HARDWARE.md#programming) (on macOS the IDE needs a UTF-8 locale).
 
 **[📖 Complete API Reference →](docs/API.md)**
 
 ### Hardware
 
-The `/hardware` folder contains the designs to 3D print for the watch case, plus
-two bring-up sketches: `epd_test/` (display) and `rtc_test/` (RTC and deep-sleep wake).
+The `/hardware` folder contains the designs to 3D print for the watch case.
 
 ---
 
@@ -71,7 +74,7 @@ graytimer/
 ├── myfonts/                # Custom GFX fonts (66 fonts)
 ├── mywatchfaces/           # Watchface definitions (95 watchfaces)
 │
-├── hardware/               # Case models, epd_test/ and rtc_test/ sketches
+├── hardware/               # Case models
 ├── watchfaceutils/         # Python development tools
 │   ├── configure_watchface.py
 │   ├── render_watchface.py
@@ -80,6 +83,7 @@ graytimer/
 └── docs/                   # Documentation
     ├── README.md           # Documentation index
     ├── GALLERY.md          # All watchfaces with previews
+    ├── CATALOG.md          # Face numbers and NFC commands
     ├── API.md              # WatchFace API reference
     └── HARDWARE.md         # Detailed hardware guide
 ```

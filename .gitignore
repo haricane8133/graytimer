@@ -1,4 +1,5 @@
 raw/
 __pycache__/
 *.skb
+hardware/tests/
 local/

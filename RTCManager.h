@@ -18,11 +18,6 @@ public:
 private:
   bool initialized;
 
-  // RV-8803 user RAM register (0x07) bit 7 marks a saved watchface index.
-  // The library only touches this register from setEpoch()/setTimeZoneQuarterHours(),
-  // which this sketch never calls.
-  static const uint8_t FACE_VALID = 0x80;
-
   const char* monthNames[12] = {
     "Jan", "Feb", "Mar", "Apr", "May", "Jun",
     "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"
@@ -94,17 +89,19 @@ public:
   }
 
   /**
-   * Watchface index saved before the last System OFF, or -1 if none
+   * The byte of watch state saved before the last System OFF, kept in the
+   * RV-8803's user RAM register (0x07); 0 after the RTC loses power. The
+   * library only touches this register from setEpoch()/setTimeZoneQuarterHours(),
+   * which this sketch never calls.
    */
-  int loadFaceIndex() {
-    if (!initialized) return -1;
-    uint8_t v = rtc.readRegister(RV8803_RAM);
-    return (v & FACE_VALID) ? (v & 0x7F) : -1;
+  uint8_t loadFaceState() {
+    if (!initialized) return 0;
+    return rtc.readRegister(RV8803_RAM);
   }
 
-  void saveFaceIndex(uint8_t index) {
+  void saveFaceState(uint8_t state) {
     if (!initialized) return;
-    rtc.writeRegister(RV8803_RAM, FACE_VALID | (index & 0x7F));
+    rtc.writeRegister(RV8803_RAM, state);
   }
 
   /**

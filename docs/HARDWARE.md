@@ -13,6 +13,7 @@ Detailed hardware information for the e-paper watch project.
 | Display adapter | GoodDisplay DESPI-C02 | 24-pin FPC breakout with the high-voltage boost; RESE switch |
 | RTC | SmartElex RV-8803 module | I2C, ±3ppm temperature compensated, 0.24µA, INT wakes the MCU, onboard backup cell |
 | Battery | LiPo 3.7V | Recommend 300-500mAh, JST connector |
+| NFC antenna | 13.56 MHz coil | On the Xiao's NFC pads; a phone picks the face or sets the time |
 | Button | Tactile switch (optional) | For future features |
 
 ---
@@ -74,6 +75,30 @@ appears to follow — check against your board):
   the time must be set again over serial.
 - The board's 4.7k I2C pull-ups ("I2C" jumper) are the only ones on the bus;
   leave them in.
+
+### NFC Antenna
+
+```
+MCU Pad       | Function | Description
+--------------|----------|---------------------------
+NFC1 (P0.09)  | NFC      | Antenna coil, either end
+NFC2 (P0.10)  | NFC      | Antenna coil, other end
+```
+
+The pads are on the back of the Xiao. The firmware makes the watch an NFC Type 2
+tag (Seeed's XIAO_nRF52840_NFC library); see [the catalog](CATALOG.md) for what a
+phone can write.
+
+**Range**: with Seeed's 13.56 MHz antenna (made for their PN532 reader boards)
+the phone must be held very close and well aligned, and iOS now and then says
+"Tag not supported". The Xiao has no matching capacitors on these pads, so the
+coil is untuned. Seeed reports the Molex 1462360051 and Taoglas FXR.07.A.DG
+working without capacitors, and the Taoglas better with 43 pF (C0G) from each pad
+to GND. Keep the coil away from the LiPo's metal foil, or put a ferrite sheet
+between them.
+
+**NEVER run the core's `nfc_to_gpio` example**: it permanently turns these pads
+into GPIOs (a one-way UICR change).
 
 ### Optional Peripherals
 
@@ -137,7 +162,15 @@ Free pin: **D5** (P0.05). Every other Xiao pin is assigned above.
 The watch sits in nRF52840 System OFF. At every minute rollover the RV-8803
 pulls INT (D2) low, which resets the chip into `setup()`; it reads the time,
 refreshes the display, hibernates it, clears the RTC flag and goes back to
-System OFF. The watchface index survives in the RV-8803's user RAM register.
+System OFF. The face number and mode (shuffle or pinned) survive in the
+RV-8803's user RAM register.
+
+A phone's NFC field also wakes it: the NFCT peripheral keeps sensing for a field
+in System OFF, a passive detector that adds next to nothing to the sleep
+current. An NFC wake serves the tag until the phone has been gone for 3 s,
+redraws only if the phone wrote a command, and goes back to System OFF. The tag
+and its 64 MHz crystal never start on a minute wake, so those cost the same as
+before.
 
 Estimates (not yet measured):
 
@@ -198,8 +231,9 @@ Each wake also spends ~0.5 s in the bootloader before `setup()` runs.
 6. **Display ribbon cable** - handle carefully, easy to damage. The DESPI-C02
    connector contacts both faces, so a flipped ribbon still connects but with
    the pin order reversed. Match pin 1 (or the orientation the panel had on its
-   original board) before powering, then confirm with `hardware/epd_test/`:
-   about 2.18 s per full refresh means it is seated correctly. Keep case edges
+   original board) before powering, then confirm with `ENABLE_SERIAL_DEBUG`
+   on: GxEPD2 printing `_Update_Full` of about 2,180,000 µs on a cold boot
+   means it is seated correctly. Keep case edges
    off the two glass corners beside the ribbon.
 7. **DESPI-C02 RESE switch** - start at 0.47Ω
 8. **Button debouncing** - add 100nF capacitor if implementing button
@@ -213,13 +247,13 @@ Each wake also spends ~0.5 s in the bootloader before `setup()` runs.
 **Display shows nothing**:
 - Check 3.3V power to display
 - Verify the 5 signal connections (DAT, SCL, CS, DC, RES) plus GND
-- Flash `hardware/epd_test/epd_test.ino` with BUSY on D9 — it prints the
-  library's diagnostics (`_Update_Full : <µs>` or `Busy Timeout!`)
+- Set `ENABLE_SERIAL_DEBUG = true` and watch a cold boot: GxEPD2 prints its
+  diagnostics (`_Update_Full : <µs>` or `Busy Timeout!`)
 - If the RTC is not found the firmware halts *before* touching the display
   (`setup()` loops forever) — a dead display can really be an RTC wiring fault
 - Try full refresh mode
 
-**`epd_test` prints `_Update_Full : 0`**: the panel controller is not answering.
+**GxEPD2 prints `_Update_Full : 0`**: the panel controller is not answering.
 The ribbon is reversed or not seated (see the ribbon note in Assembly Notes).
 
 **`_Update_Full` ≈ 2,180,000 µs but the image never changes**: the controller
@@ -280,22 +314,31 @@ D2 low.
 Board: **Seeed nRF52 Boards → Seeed XIAO nRF52840** (FQBN
 `Seeeduino:nrf52:xiaonRF52840`), not the mbed "XIAO nRF52840 (No Updates)" board.
 
-Build and upload from a terminal. The Arduino IDE 2 runs its build tools with
-`LC_ALL=C`, and the core's `adafruit-nrfutil` refuses to run without a UTF-8
-locale, so IDE Verify/Upload fail on macOS:
+The core's uploader, `adafruit-nrfutil`, refuses to run without a UTF-8 locale.
+On macOS the Arduino IDE 2 gets none when started from the Dock (and it rewrites
+`LC_ALL` to `C` when `LC_ALL` is set), so IDE uploads fail with a "Python was
+configured to use ASCII" error. Give apps a UTF-8 `LANG`, then restart the IDE;
+this lasts until the next reboot:
+
+```bash
+launchctl setenv LANG en_US.UTF-8
+```
+
+Or build and upload from a terminal:
 
 ```bash
 cd graytimer && LC_ALL=en_US.UTF-8 "/Applications/Arduino IDE.app/Contents/Resources/app/lib/backend/resources/arduino-cli" --config-file ~/.arduinoIDE/arduino-cli.yaml compile --upload -p "$(ls /dev/cu.usbmodem* | head -1)" --fqbn Seeeduino:nrf52:xiaonRF52840 .
 ```
 
-The same command builds `hardware/epd_test/` or `hardware/rtc_test/` when run
-from those folders.
+The watch needs Seeed's [XIAO_nRF52840_NFC](https://github.com/limengdu/XIAO_nRF52840_NFC)
+library (Sketch → Include Library → Add .ZIP Library).
 
 The watch spends nearly all its time in System OFF, where USB is not running, so
 the automatic upload (1200-baud touch) cannot reach it. **Double-tap the Xiao's
 reset button** to enter the bootloader first. A cold boot (reset button,
 power-on, upload) waits for the serial time line when `ENABLE_TIME_SETUP` and
-`ENABLE_SERIAL_DEBUG` are on.
+`ENABLE_SERIAL_DEBUG` are on; the time can also be set from a phone over NFC
+(see [the catalog](CATALOG.md)).
 
 ---
 
