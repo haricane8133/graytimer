@@ -134,6 +134,27 @@ WatchFace* allWatchFaces[] = {
   new WatchFace_camera(),  // 93
   new WatchFace_sailboat(),  // 94
   new WatchFace_hari(),  // 95
+  // Hades
+  new WatchFace_nectar(),  // 96
+  new WatchFace_ambrosia(),  // 97
+  new WatchFace_darkness(),  // 98
+  new WatchFace_chthonickey(),  // 99
+  new WatchFace_titanblood(),  // 100
+  new WatchFace_diamond(),  // 101
+  new WatchFace_gemstone(),  // 102
+  new WatchFace_obol(),  // 103
+  new WatchFace_centaurheart(),  // 104
+  new WatchFace_pom(),  // 105
+  new WatchFace_hammer(),  // 106
+  new WatchFace_spikedcollar(),  // 107
+  new WatchFace_butterfly(),  // 108
+  new WatchFace_owlpendant(),  // 109
+  new WatchFace_cosmicegg(),  // 110
+  new WatchFace_hourglass(),  // 111
+  new WatchFace_skullearring(),  // 112
+  new WatchFace_coinpurse(),  // 113
+  new WatchFace_rose(),  // 114
+  new WatchFace_luckytooth(),  // 115
 };
 static_assert(sizeof(allWatchFaces) / sizeof(allWatchFaces[0]) <= 128,
               "face number is saved in 7 bits of RTC RAM");

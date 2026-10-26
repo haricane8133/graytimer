@@ -109,7 +109,8 @@ def generate_all_configured_watchfaces(output_dir="previews",
         'tie', 'deathstar', 'hallows', 'prism', 'orbit', 'orion', 'kolam', 'vinyl', 'sunburst', 'minimal', 'moon',
         'glasses', 'snitch', 'lightsaber', 'rocket', 'cassette', 'equalizer', 'mandala', 'forest', 'dial', 'waves',
         'r2d2', 'falcon', 'hedwig', 'penguin', 'headphones', 'ufo', 'balloon', 'lighthouse', 'diya', 'coffee', 'bicycle', 'whale',
-        'thunderjaw', 'watcher', 'sawtooth', 'stormbird', 'strider', 'vader', 'mando', 'boodoor', 'astronaut', 'cat', 'camera', 'sailboat', 'hari'
+        'thunderjaw', 'watcher', 'sawtooth', 'stormbird', 'strider', 'vader', 'mando', 'boodoor', 'astronaut', 'cat', 'camera', 'sailboat', 'hari',
+        'nectar', 'ambrosia', 'darkness', 'chthonickey', 'titanblood', 'diamond', 'gemstone', 'obol', 'centaurheart', 'pom', 'hammer', 'spikedcollar', 'butterfly', 'owlpendant', 'cosmicegg', 'hourglass', 'skullearring', 'coinpurse', 'rose', 'luckytooth'
     ]
     # Removed 'crow', 'giraffe1', 'claw'
 

@@ -6,6 +6,9 @@ Adafruit-GFX's fontconvert: 141 DPI, 1-bit glyph bitmaps, chars 0x20-0x7E).
 Usage:
     python3 ttf_to_gfx.py Orbitron.ttf 20 --name Orbitron_Bold --weight 700
     -> ../myfonts/Orbitron_Bold20pt7b.h defining `Orbitron_Bold20pt7b`
+    python3 ttf_to_gfx.py Horizon.ttf 13 20 --name Horizon --fallback Orbitron.ttf --fallback-weight 400 \\
+        --fallback-scale 0.73 --caps-from-lowercase
+    -> Horizon's letters with Orbitron's digits and punctuation
 """
 
 import argparse
@@ -17,18 +20,37 @@ DPI = 141
 FIRST, LAST = 0x20, 0x7E
 
 
-def convert(ttf, pt, name, weight=None, out_dir=Path(__file__).parent.parent / "myfonts"):
-    px = pt * DPI / 72
+def load(ttf, px, weight=None):
     font = ImageFont.truetype(str(ttf), int(round(px)))
     if weight is not None:
         try:
             font.set_variation_by_axes([weight])
         except OSError:
             pass  # not a variable font
+    return font
+
+
+def has_glyph(font, ch):
+    """False if the font draws `ch` as its .notdef box (or not at all)"""
+    notdef = font.getmask("\uffff")
+    m = font.getmask(ch)
+    return m.size != notdef.size or bytes(m) != bytes(notdef)
+
+
+def convert(ttf, pt, name, weight=None, out_dir=Path(__file__).parent.parent / "myfonts",
+            fallback=None, fallback_weight=None, fallback_scale=1.0, caps_from_lowercase=False):
+    px = pt * DPI / 72
+    primary = load(ttf, px, weight)
+    secondary = load(fallback, px * fallback_scale, fallback_weight) if fallback else None
 
     bitmaps, glyphs = bytearray(), []
     for code in range(FIRST, LAST + 1):
         ch = chr(code)
+        if caps_from_lowercase and ch.isupper():
+            ch = ch.lower()  # e.g. Horizon's capitals have stems that reach into the next line
+        font = primary
+        if secondary and ch != " " and not has_glyph(primary, ch):
+            font = secondary  # e.g. a letters-only display font borrowing digits and punctuation
         l, t, r, b = font.getbbox(ch, anchor="ls")
         w, h = r - l, b - t
         adv = int(round(font.getlength(ch)))
@@ -50,7 +72,7 @@ def convert(ttf, pt, name, weight=None, out_dir=Path(__file__).parent.parent / "
             bitmaps.append(cur << (8 - bit))
         glyphs.append((offset, w, h, adv, l, t))
 
-    ascent, descent = font.getmetrics()
+    ascent, descent = primary.getmetrics()
     y_adv = ascent + descent
     sym = f"{name}{pt}pt7b"
 
@@ -81,6 +103,11 @@ if __name__ == "__main__":
     ap.add_argument("pt", type=int, nargs="+")
     ap.add_argument("--name", required=True, help="symbol prefix, e.g. Orbitron_Bold")
     ap.add_argument("--weight", type=float, help="weight axis value for variable fonts")
+    ap.add_argument("--fallback", help="font to take any glyph the main font lacks from")
+    ap.add_argument("--fallback-weight", type=float, help="weight axis value for the fallback font")
+    ap.add_argument("--fallback-scale", type=float, default=1.0, help="size of the fallback font relative to the main one")
+    ap.add_argument("--caps-from-lowercase", action="store_true", help="draw A-Z with the font's a-z shapes")
     a = ap.parse_args()
     for pt in a.pt:
-        print("wrote", convert(a.ttf, pt, a.name, a.weight))
+        print("wrote", convert(a.ttf, pt, a.name, a.weight, fallback=a.fallback, fallback_weight=a.fallback_weight,
+                               fallback_scale=a.fallback_scale, caps_from_lowercase=a.caps_from_lowercase))

@@ -182,18 +182,20 @@ class Watchface:
             hex_values = re.findall(r'0x([0-9A-Fa-f]{2})', bitmap_match.group(1))
             self.bitmap = [int(h, 16) for h in hex_values]
 
-    def render(self):
-        """Render the watchface bitmap to a PIL Image"""
+    def render(self, width=None, height=None):
+        """Render the watchface bitmap (width x height, default 200x200) to a PIL Image"""
+        width = width or self.width
+        height = height or self.height
         # Create white background (e-paper style)
-        image = Image.new('1', (self.width, self.height), 1)
+        image = Image.new('1', (width, height), 1)
         pixels = image.load()
 
-        # Render bitmap (1-bit packed format, MSB first)
-        for y in range(self.height):
-            for x in range(self.width):
-                bit_index = y * self.width + x
-                byte_index = bit_index // 8
-                bit_position = 7 - (bit_index % 8)
+        # Render bitmap (1-bit packed format, MSB first, rows padded to whole bytes like drawBitmap)
+        row_bytes = (width + 7) // 8
+        for y in range(height):
+            for x in range(width):
+                byte_index = y * row_bytes + x // 8
+                bit_position = 7 - (x % 8)
 
                 if byte_index < len(self.bitmap):
                     if (self.bitmap[byte_index] >> bit_position) & 1:
@@ -224,8 +226,8 @@ def render_watchface_preview(watchface_path, time_font_path, date_font_path,
         layout: 0 = single line (default), 1 = two lines
         time_color: 0 = black, 1 = white (inverted)
         date_color: 0 = black, 1 = white (inverted)
-        bitmap_x_start, bitmap_y_start: Bitmap offset
-        bitmap_x_end, bitmap_y_end: Bitmap size
+        bitmap_x_start, bitmap_y_start: where the bitmap's top-left corner goes
+        bitmap_x_end, bitmap_y_end: bitmap width and height (despite the names)
     """
     screenW = 200
     screenH = 200
@@ -233,15 +235,11 @@ def render_watchface_preview(watchface_path, time_font_path, date_font_path,
     # Parse watchface
     watchface = Watchface(watchface_path)
 
-    # Render bitmap with cropping support
+    # Like drawBitmap() in myutils.cpp: the bitmap is bitmap_x_end x bitmap_y_end pixels, drawn at
+    # (bitmap_x_start, bitmap_y_start)
     if bitmap_x_start != 0 or bitmap_y_start != 0 or bitmap_x_end != 200 or bitmap_y_end != 200:
-        # Create full white canvas
         image = Image.new('1', (screenW, screenH), 1)
-        # Render watchface (will be cropped)
-        wf_image = watchface.render()
-        # Paste cropped region
-        image.paste(wf_image.crop((bitmap_x_start, bitmap_y_start, bitmap_x_end, bitmap_y_end)),
-                   (bitmap_x_start, bitmap_y_start))
+        image.paste(watchface.render(bitmap_x_end, bitmap_y_end), (bitmap_x_start, bitmap_y_start))
     else:
         image = watchface.render()
 

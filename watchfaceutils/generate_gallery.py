@@ -48,6 +48,14 @@ GROUPS = [
         ("walker", "Walker"), ("thunderjaw", "Thunderjaw*"), ("watcher", "Watcher*"), ("sawtooth", "Sawtooth*"),
         ("stormbird", "Stormbird*"), ("strider", "Strider*"),
     ]),
+    ("Hades", [
+        ("nectar", "Nectar*"), ("ambrosia", "Ambrosia*"), ("darkness", "Darkness*"), ("chthonickey", "Chthonic Key*"),
+        ("titanblood", "Titan Blood*"), ("diamond", "Diamond*"), ("gemstone", "Gemstones*"), ("obol", "Charon's Obol*"),
+        ("centaurheart", "Centaur Heart*"), ("pom", "Pom of Power*"), ("hammer", "Daedalus Hammer*"),
+        ("spikedcollar", "Old Spiked Collar*"), ("butterfly", "Pierced Butterfly*"), ("owlpendant", "Owl Pendant*"),
+        ("cosmicegg", "Cosmic Egg*"), ("hourglass", "Bone Hourglass*"), ("skullearring", "Skull Earring*"),
+        ("coinpurse", "Chthonic Coin Purse*"), ("rose", "Eternal Rose*"), ("luckytooth", "Lucky Tooth*"),
+    ]),
     ("Music & Entertainment", [
         ("guitar1", "Guitar 1"), ("guitar2", "Guitar 2"), ("ps", "PlayStation"), ("prism", "Prism (Dark Side of the Moon)*"),
         ("vinyl", "Vinyl*"), ("cassette", "Cassette*"), ("equalizer", "Equalizer*"), ("headphones", "Headphones*"),

@@ -6,7 +6,7 @@ Complete documentation for the e-paper watch project.
 
 ## Documentation Index
 
-- **[Watchface Gallery](GALLERY.md)** - Browse all 95 watchfaces with preview images
+- **[Watchface Gallery](GALLERY.md)** - Browse all 115 watchfaces with preview images
 - **[Watchface Catalog](CATALOG.md)** - Face numbers, and how to pick a face or set the time from a phone over NFC
 - **[WatchFace API Reference](API.md)** - Complete API documentation for creating custom watchfaces
 - **[Hardware Guide](HARDWARE.md)** - Detailed hardware specifications, wiring, and assembly
@@ -16,7 +16,7 @@ Complete documentation for the e-paper watch project.
 ## Features
 
 - **Display**: 200×200 monochrome e-paper (1.54", 200 DPI)
-- **Watchfaces**: 95+ pre-configured with custom fonts
+- **Watchfaces**: 115+ pre-configured with custom fonts
 - **Time Keeping**: RV-8803 RTC (±3ppm), wakes the MCU from System OFF every minute
 - **NFC**: a phone writes a face number or the date and time with any NFC tag app; its field wakes the watch
 - **Refresh Modes**: Partial (fast) and full (ghosting-free)
@@ -130,7 +130,7 @@ WatchFace* allWatchFaces[] = {
 
 ## Watchface Gallery
 
-**[📸 View All 95 Watchfaces →](GALLERY.md)**
+**[📸 View All 115 Watchfaces →](GALLERY.md)**
 
 Preview of available watchfaces:
 
@@ -165,7 +165,7 @@ Preview of available watchfaces:
   </tr>
 </table>
 
-**Collections**: Star Wars (13) • Harry Potter (10) • Club Penguin (8) • Animals (9) • Other Characters (11) • Horizon Zero Dawn (6) • Music & Entertainment (8) • Nature & Landscapes (9) • Space (7) • Cultural & Spiritual (6) • Everyday Things (3) • Abstract & Patterns (5)
+**Collections**: Star Wars (13) • Harry Potter (10) • Club Penguin (8) • Animals (9) • Other Characters (11) • Horizon Zero Dawn (6) • Hades (20) • Music & Entertainment (8) • Nature & Landscapes (9) • Space (7) • Cultural & Spiritual (6) • Everyday Things (3) • Abstract & Patterns (5)
 
 ---
 

@@ -327,9 +327,9 @@ struct WatchFace_thunderjaw : public WatchFace {
     layout = 1;
     text1x = -1;
     text1y = 8;
-    text1font = &Orbitron_Bold15pt7b;
+    text1font = &Horizon20pt7b;
     text2x = -1;
     text2y = 26;
-    text2font = &Orbitron_Bold10pt7b;
+    text2font = &Horizon13pt7b;
   }
 };

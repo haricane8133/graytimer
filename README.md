@@ -72,7 +72,7 @@ graytimer/
 ├── RTCManager.h            # Time management
 │
 ├── myfonts/                # Custom GFX fonts (66 fonts)
-├── mywatchfaces/           # Watchface definitions (95 watchfaces)
+├── mywatchfaces/           # Watchface definitions (115 watchfaces)
 │
 ├── hardware/               # Case models
 ├── watchfaceutils/         # Python development tools

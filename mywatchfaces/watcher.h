@@ -327,9 +327,9 @@ struct WatchFace_watcher : public WatchFace {
     layout = 1;
     text1x = 4;
     text1y = 5;
-    text1font = &Orbitron_Bold15pt7b;
+    text1font = &Horizon20pt7b;
     text2x = 4;
     text2y = 86;
-    text2font = &Orbitron_Bold10pt7b;
+    text2font = &Horizon13pt7b;
   }
 };

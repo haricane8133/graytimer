@@ -460,6 +460,96 @@ A reset or power loss puts the watch back in shuffle mode.
       <img src="../watchfaceutils/previews/hari.png" width="150"/><br/>
       <b>95 · Hari (Tamil)*</b>
     </td>
+    <td align="center" width="25%">
+      <img src="../watchfaceutils/previews/nectar.png" width="150"/><br/>
+      <b>96 · Nectar*</b>
+    </td>
+  </tr>
+  <tr>
+    <td align="center" width="25%">
+      <img src="../watchfaceutils/previews/ambrosia.png" width="150"/><br/>
+      <b>97 · Ambrosia*</b>
+    </td>
+    <td align="center" width="25%">
+      <img src="../watchfaceutils/previews/darkness.png" width="150"/><br/>
+      <b>98 · Darkness*</b>
+    </td>
+    <td align="center" width="25%">
+      <img src="../watchfaceutils/previews/chthonickey.png" width="150"/><br/>
+      <b>99 · Chthonic Key*</b>
+    </td>
+    <td align="center" width="25%">
+      <img src="../watchfaceutils/previews/titanblood.png" width="150"/><br/>
+      <b>100 · Titan Blood*</b>
+    </td>
+  </tr>
+  <tr>
+    <td align="center" width="25%">
+      <img src="../watchfaceutils/previews/diamond.png" width="150"/><br/>
+      <b>101 · Diamond*</b>
+    </td>
+    <td align="center" width="25%">
+      <img src="../watchfaceutils/previews/gemstone.png" width="150"/><br/>
+      <b>102 · Gemstones*</b>
+    </td>
+    <td align="center" width="25%">
+      <img src="../watchfaceutils/previews/obol.png" width="150"/><br/>
+      <b>103 · Charon's Obol*</b>
+    </td>
+    <td align="center" width="25%">
+      <img src="../watchfaceutils/previews/centaurheart.png" width="150"/><br/>
+      <b>104 · Centaur Heart*</b>
+    </td>
+  </tr>
+  <tr>
+    <td align="center" width="25%">
+      <img src="../watchfaceutils/previews/pom.png" width="150"/><br/>
+      <b>105 · Pom of Power*</b>
+    </td>
+    <td align="center" width="25%">
+      <img src="../watchfaceutils/previews/hammer.png" width="150"/><br/>
+      <b>106 · Daedalus Hammer*</b>
+    </td>
+    <td align="center" width="25%">
+      <img src="../watchfaceutils/previews/spikedcollar.png" width="150"/><br/>
+      <b>107 · Old Spiked Collar*</b>
+    </td>
+    <td align="center" width="25%">
+      <img src="../watchfaceutils/previews/butterfly.png" width="150"/><br/>
+      <b>108 · Pierced Butterfly*</b>
+    </td>
+  </tr>
+  <tr>
+    <td align="center" width="25%">
+      <img src="../watchfaceutils/previews/owlpendant.png" width="150"/><br/>
+      <b>109 · Owl Pendant*</b>
+    </td>
+    <td align="center" width="25%">
+      <img src="../watchfaceutils/previews/cosmicegg.png" width="150"/><br/>
+      <b>110 · Cosmic Egg*</b>
+    </td>
+    <td align="center" width="25%">
+      <img src="../watchfaceutils/previews/hourglass.png" width="150"/><br/>
+      <b>111 · Bone Hourglass*</b>
+    </td>
+    <td align="center" width="25%">
+      <img src="../watchfaceutils/previews/skullearring.png" width="150"/><br/>
+      <b>112 · Skull Earring*</b>
+    </td>
+  </tr>
+  <tr>
+    <td align="center" width="25%">
+      <img src="../watchfaceutils/previews/coinpurse.png" width="150"/><br/>
+      <b>113 · Chthonic Coin Purse*</b>
+    </td>
+    <td align="center" width="25%">
+      <img src="../watchfaceutils/previews/rose.png" width="150"/><br/>
+      <b>114 · Eternal Rose*</b>
+    </td>
+    <td align="center" width="25%">
+      <img src="../watchfaceutils/previews/luckytooth.png" width="150"/><br/>
+      <b>115 · Lucky Tooth*</b>
+    </td>
   </tr>
 </table>
 <!-- catalog:end -->

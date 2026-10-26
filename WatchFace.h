@@ -4,6 +4,8 @@
 struct WatchFace {
   const unsigned char* bitmap;
 
+  // bitmap is bitmap_x_end x bitmap_y_end pixels (width and height, despite the names),
+  // drawn with its top-left corner at (bitmap_x_start, bitmap_y_start)
   int bitmap_x_start = 0;
   int bitmap_y_start = 0;
   int bitmap_x_end = 200;
