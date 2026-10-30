@@ -367,4 +367,4 @@ python3 generate_all_previews.py
 
 ---
 
-**Back to**: [Main README](README.md) | [Gallery](GALLERY.md)
+**Back to**: [Main README](README.md) | [Catalog](CATALOG.md)

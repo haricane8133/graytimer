@@ -6,8 +6,8 @@ Complete documentation for the e-paper watch project.
 
 ## Documentation Index
 
-- **[Watchface Gallery](GALLERY.md)** - Browse all 115 watchfaces with preview images
-- **[Watchface Catalog](CATALOG.md)** - Face numbers, and how to pick a face or set the time from a phone over NFC
+- **[Watchface Catalog](CATALOG.md)** - Browse all 115 watchfaces by collection, and pick one or set the time from a phone over NFC
+- **[Gallery](GALLERY.md)** - Photos of the finished watch
 - **[WatchFace API Reference](API.md)** - Complete API documentation for creating custom watchfaces
 - **[Hardware Guide](HARDWARE.md)** - Detailed hardware specifications, wiring, and assembly
 
@@ -128,9 +128,9 @@ WatchFace* allWatchFaces[] = {
 
 ---
 
-## Watchface Gallery
+## Watchfaces
 
-**[📸 View All 115 Watchfaces →](GALLERY.md)**
+**[📋 See all 115 watchfaces in the catalog →](CATALOG.md)**
 
 Preview of available watchfaces:
 

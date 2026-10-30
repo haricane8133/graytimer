@@ -1,9 +1,9 @@
 #!/usr/bin/env python3
 """
-Regenerate the collection tables in docs/GALLERY.md, the numbered catalog in
-docs/CATALOG.md and the collections line in docs/README.md from the GROUPS list
-below. Everything outside the <!-- gallery:start --> / <!-- gallery:end -->
-(and catalog:) markers is left untouched.
+Regenerate the faces in docs/CATALOG.md, grouped by collection with their
+numbers and previews, and the face counts in docs/README.md and README.md,
+from the GROUPS list below. In CATALOG.md everything outside the
+<!-- catalog:start --> / <!-- catalog:end --> markers is left untouched.
 
 A face's number is its position in allWatchFaces[] in graytimer.ino, which a
 phone writes over NFC to pin it. This script checks the "// N" comment on each
@@ -112,6 +112,11 @@ def cell(name, label, number=None, width=200, cols=3):
     return f"    <!-- {td.strip()} -->\n" if retired else td
 
 
+def anchor(title):
+    """GitHub's link anchor for a heading"""
+    return re.sub(r"[^\w\- ]", "", title.lower()).replace(" ", "-")
+
+
 def replace_between(text, marker, body):
     return re.sub(rf"(<!-- {marker}:start -->\n).*?(<!-- {marker}:end -->)",
                   lambda m: m.group(1) + body + m.group(2), text, flags=re.S)
@@ -127,34 +132,29 @@ def main():
     out, counts = [], []
     for title, faces in GROUPS:
         counts.append((title.replace(" Collection", ""), sum(1 for n, _ in faces if not n.startswith("!"))))
-        out.append(f"## {title}\n\n<table>\n")
+        out.append(f"### {title}\n\n<table>\n")
         for i in range(0, len(faces), 3):
             out.append("  <tr>\n" + "".join(cell(n, l, numbers.get(n)) for n, l in faces[i:i + 3]) + "  </tr>\n")
         out.append("</table>\n\n")
     total = sum(c for _, c in counts)
 
-    by_number = sorted(numbers, key=numbers.get)
-    cat = ["<table>\n"]
-    for i in range(0, len(by_number), 4):
-        cat.append("  <tr>\n" + "".join(cell(n, labels[n], numbers[n], 150, 4) for n in by_number[i:i + 4]) + "  </tr>\n")
-    cat.append("</table>\n")
+    contents = " · ".join(f"[{name} ({c})](#{anchor(title)})" for (title, _), (name, c) in zip(GROUPS, counts))
     catalog = ROOT / "docs" / "CATALOG.md"
-    catalog.write_text(replace_between(catalog.read_text(), "catalog", "".join(cat)))
-
-    gal = ROOT / "docs" / "GALLERY.md"
-    s = replace_between(gal.read_text(), "gallery", "".join(out))
-    s = re.sub(r"Browse all \d+ available", f"Browse all {total} available", s)
-    s = re.sub(r"\*\*Total Watchfaces\*\*: \d+", f"**Total Watchfaces**: {total}", s)
-    gal.write_text(s)
+    s = replace_between(catalog.read_text(), "catalog", contents + "\n\n" + "".join(out).rstrip("\n") + "\n")
+    s = re.sub(r"([Aa]ll) \d+ faces", rf"\1 {total} faces", s)
+    catalog.write_text(s)
 
     readme = ROOT / "docs" / "README.md"
     t = readme.read_text()
     t = re.sub(r"\*\*Collections\*\*:.*", "**Collections**: " + " • ".join(f"{n} ({c})" for n, c in counts), t)
     t = re.sub(r"Browse all \d+ watchfaces", f"Browse all {total} watchfaces", t)
     t = re.sub(r"\d+\+ pre-configured", f"{total}+ pre-configured", t)
-    t = re.sub(r"View All \d+ Watchfaces", f"View All {total} Watchfaces", t)
+    t = re.sub(r"all \d+ watchfaces", f"all {total} watchfaces", t)
     readme.write_text(t)
-    (ROOT / "README.md").write_text(re.sub(r"\(\d+ watchfaces\)", f"({total} watchfaces)", (ROOT / "README.md").read_text()))
+    t = (ROOT / "README.md").read_text()
+    t = re.sub(r"\(\d+ watchfaces\)", f"({total} watchfaces)", t)
+    t = re.sub(r"all \d+ watchfaces", f"all {total} watchfaces", t)
+    (ROOT / "README.md").write_text(t)
     print(f"{total} watchfaces in {len(GROUPS)} collections")
 
 

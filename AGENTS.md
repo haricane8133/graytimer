@@ -22,8 +22,8 @@ It shows the time over a watchface (a bitmap plus fonts). There are 115 watchfac
 | `WatchFace` fields, layouts, positioning, making a face by hand | [docs/API.md](docs/API.md), [WatchFace.h](WatchFace.h) |
 | Settings (`ENABLE_*`), face catalog `allWatchFaces[]`, sleep/wake, NFC | [graytimer.ino](graytimer.ino) (top-of-section comments) |
 | Rendering, display driver, includes of every font and face | [myutils.cpp](myutils.cpp), [myutils.h](myutils.h) |
-| Face numbers and the phone (NFC) commands | [docs/CATALOG.md](docs/CATALOG.md) |
-| All faces by collection, with previews | [docs/GALLERY.md](docs/GALLERY.md) |
+| All faces by collection with numbers and previews, and the phone (NFC) commands | [docs/CATALOG.md](docs/CATALOG.md) |
+| Photos of the finished watch | [docs/GALLERY.md](docs/GALLERY.md) |
 | Python tools: generate, dither, preview, convert fonts | docstrings at the top of each `watchfaceutils/*.py` |
 | Licences and sources of third-party art and fonts | `watchfaceutils/sources/*/README.md` |
 | Notes on the user's own unit: repair log, damaged pads (gitignored, may be absent) | `local/` |
@@ -43,6 +43,7 @@ The watch sleeps in nRF52840 System OFF.
 - `0` turns on shuffle.
 - `N` pins face N.
 - `YYYY-MM-DD HH:MM:SS` sets the clock.
+- `dfu` puts it in the bootloader for a USB upload.
 
 Reading the tag gives a status text from `writeStatusRecord`.
 
@@ -53,14 +54,14 @@ Reading the tag gives a status text from `writeStatusRecord`.
 - **Face numbers are permanent.** A face's number is its position in `allWatchFaces[]`, and phones use these numbers.
   - Add new faces at the end only.
   - To retire a face, replace its line with `nullptr,  // N retired`. Never delete or reorder lines.
-  - Keep the `// N` comment on every line: `generate_gallery.py` checks them.
+  - Keep the `// N` comment on every line: `generate_catalog.py` checks them.
   - There can be at most 127 faces, because the number is stored in 7 bits.
 - **Flash is about 96% full.** Store new art faces cropped (`write_header(..., crop=True)` in `generate_geometric.py`), then compile and check the size.
 - **Artwork is 1-bit at 200×200.**
   - Dither photos at their final size (`dither_source.py`) and never resample them afterwards.
   - Line art and geometric faces are thresholded, not dithered.
   - Dithered faces look much better on the panel than in PNG previews. Don't call them muddy or suggest retiring them. Only text that can't be read is a problem.
-- **Don't hand-edit generated doc sections.** Content between `<!-- gallery:start/end -->` and `<!-- catalog:start/end -->` markers, and the face counts, is written by `generate_gallery.py`.
+- **Don't hand-edit generated doc sections.** Content between the `<!-- catalog:start/end -->` markers, and the face counts, is written by `generate_catalog.py`.
 - **Never run the core's `nfc_to_gpio` example.** It turns the NFC pads into GPIOs permanently.
 - **Don't patch the Seeed core, board files or installed libraries.** Work around them in the sketch.
 - **RTC SCL is on D6, not the Xiao default D5.** Keep it there; `local/REPAIR_LOG.md` says why.
@@ -70,8 +71,8 @@ Reading the tag gives a status text from `writeStatusRecord`.
 1. **Make the header.** Generated faces get a function in `watchfaceutils/generate_geometric.py`; run `python3 generate_geometric.py <name>`. Hand-made faces start from image2cpp output; see [docs/API.md](docs/API.md).
 2. **Include it.** Add `#include "mywatchfaces/<name>.h"` to `myutils.h`.
 3. **Register it.** Append `new WatchFace_<name>(),  // N` to `allWatchFaces[]`.
-4. **Add it to the gallery.** Add `(name, label)` to `GROUPS` in `generate_gallery.py`. A trailing `*` in the label marks a generated face.
-5. **Update the docs.** In `watchfaceutils/`, run `python3 generate_all_previews.py`, then `python3 generate_gallery.py`.
+4. **Add it to the catalog.** Add `(name, label)` to `GROUPS` in `generate_catalog.py`. A trailing `*` in the label marks a generated face.
+5. **Update the docs.** In `watchfaceutils/`, run `python3 generate_all_previews.py`, then `python3 generate_catalog.py`.
 6. **Check it.** Compile (below), then look at the preview in `watchfaceutils/previews/<name>.png`. The text must be legible over the art.
 
 New third-party art or fonts get a note in `watchfaceutils/sources/<set>/README.md` giving the source and licence. Convert fonts with `ttf_to_gfx.py`.
@@ -85,7 +86,7 @@ LC_ALL=en_US.UTF-8 "/Applications/Arduino IDE.app/Contents/Resources/app/lib/bac
 
 - **Board:** use Seeed nRF52 → *Seeed XIAO nRF52840*, not the mbed board.
 - **Locale:** the uploader needs a UTF-8 locale; [docs/HARDWARE.md](docs/HARDWARE.md#programming) explains the macOS IDE workaround.
-- **Uploading:** the user uploads from the Arduino IDE. To upload, double-tap reset to enter the bootloader, because USB is off in System OFF.
+- **Uploading:** USB is off in System OFF, so put the watch in the bootloader first: the user writes `dfu` over NFC (works in the case) or double-taps reset. Then upload with arduino-cli (`compile --upload -p <port>`) or from the Arduino IDE.
 - **Hardware results:** you can't see the hardware, so ask the user what the display shows rather than assuming it works.
 - **Local-only files:** test sketches go in `hardware/tests/`, and notes about this one physical watch (repairs, damaged pins) go in `local/`. Both are gitignored.
 

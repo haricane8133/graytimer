@@ -18,7 +18,9 @@
   </tr>
 </table>
 
-[Gallery (includes all watchfaces)!](docs/GALLERY.md) · [Catalog: face numbers and NFC commands](docs/CATALOG.md)
+**[📋 Watchface catalog: all 115 watchfaces, and how to pick one from your phone →](docs/CATALOG.md)**
+
+[📸 Photos of the finished watch](docs/GALLERY.md)
 
 ---
 
@@ -82,8 +84,8 @@ graytimer/
 │
 └── docs/                   # Documentation
     ├── README.md           # Documentation index
-    ├── GALLERY.md          # All watchfaces with previews
-    ├── CATALOG.md          # Face numbers and NFC commands
+    ├── CATALOG.md          # All watchfaces by collection, and the NFC commands
+    ├── GALLERY.md          # Photos of the finished watch
     ├── API.md              # WatchFace API reference
     └── HARDWARE.md         # Detailed hardware guide
 ```

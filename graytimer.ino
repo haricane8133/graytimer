@@ -18,6 +18,7 @@
 const bool ENABLE_TIME_SETUP = false;  // Enable serial time input on cold boot
 const bool ENABLE_PARTIAL_REFRESH = true;  // Enable partial refresh for faster updates
 const uint8_t FULL_REFRESH_INTERVAL = 10;  // Full refresh when minute % N == 0 (e.g., :00, :10, :20, etc.)
+const uint8_t PINNED_FULL_REFRESH_INTERVAL = 30;  // Same for a face pinned over NFC (:00, :30)
 const bool ENABLE_WATCHFACE_CYCLING = true;  // Shuffle mode: a random face every 10 mins (phone writes 0)
 const bool ENABLE_SERIAL_DEBUG = false;  // Disable Serial to save ~1-2mA power (set false for deployment)
 
@@ -33,7 +34,7 @@ bool displayInitialized = false;  // Track if display has been initialized
 
 // Face catalog. A face's number is its position here; it is what a phone
 // writes over NFC to pin that face, and docs/CATALOG.md lists them (generated
-// by watchfaceutils/generate_gallery.py, which also checks the numbers below).
+// by watchfaceutils/generate_catalog.py, which also checks the numbers below).
 // Numbers are permanent: add new faces at the end, and retire a face by
 // replacing its line with "nullptr,  // N retired", never by deleting it.
 WatchFace* allWatchFaces[] = {
@@ -217,6 +218,9 @@ uint8_t pickNextWatchFace(uint8_t current) {
 //   1, 2, ...            -> pin that face (numbers in docs/CATALOG.md)
 //   YYYY-MM-DD HH:MM:SS  -> set the clock (24-hour). It is applied when the
 //                           phone's field drops, i.e. at the phone's tick.
+//   dfu                  -> wait in the bootloader for a USB upload, as a
+//                           double-tap of reset does (any case: phones
+//                           capitalise the first letter)
 // Anything else is ignored. Reading the tag shows a status text: the watch, a
 // link to the catalog, the face and mode, and the time when the phone woke it.
 // Needs Seeed's XIAO_nRF52840_NFC library. NEVER run the core's nfc_to_gpio
@@ -314,6 +318,11 @@ bool applyPhoneCommand() {
   DEBUG_PRINT("NFC: ");
   DEBUG_PRINTLN(s);
 
+  if (strcasecmp(s, "dfu") == 0) {
+    showUpdateMode();
+    enterSerialDfu();  // resets into the bootloader; never returns
+  }
+
   int n = (len >= 1 && len <= 3) ? digits(s, len) : -1;
   if (n == 0) {
     facePinned = false;
@@ -346,7 +355,8 @@ bool applyPhoneCommand() {
  * Cold boot (power-on, reset button, fresh upload): optional serial time setup,
  * shuffle mode with a random face, full refresh.
  * RTC wake: same face as last minute (saved in RTC RAM), partial refresh; in
- * shuffle mode a new face + full refresh at :00, :10, ...
+ * shuffle mode a new face + full refresh at :00, :10, ...; a pinned face gets
+ * a full refresh at :00 and :30.
  * NFC wake: serve the tag; redraw only for a phone command or a minute that
  * rolls over meanwhile.
  */
@@ -466,20 +476,16 @@ void goToSleep() {
  *              kept it through hibernate, so partial refresh works.
  */
 void updateDisplay(bool newMinute, bool forceFull, bool initialBoot) {
-  // Initialize display ONLY ONCE per boot
-  if (!displayInitialized) {
-    display.init(ENABLE_SERIAL_DEBUG ? 115200 : 0, initialBoot, 2, false);
-    display.setRotation(0);
-    displayInitialized = true;
-  }
+  initDisplay(initialBoot);
 
   // Get formatted time and date from RTC
   String timeStr = rtcManager.getFormattedTime(!currentWatchFace->noAMPM);
   String dateStr = rtcManager.getFormattedDate();
   uint8_t currentMinute = rtcManager.getCurrentMinute();
 
-  // Check if it's time for full refresh (every 10 mins: :00, :10, :20, etc.)
-  bool isFullRefreshTime = (currentMinute % FULL_REFRESH_INTERVAL == 0);
+  // Check if it's time for full refresh (shuffle: :00, :10, :20, etc.; pinned: :00, :30)
+  uint8_t fullRefreshInterval = facePinned ? PINNED_FULL_REFRESH_INTERVAL : FULL_REFRESH_INTERVAL;
+  bool isFullRefreshTime = (currentMinute % fullRefreshInterval == 0);
 
   // In shuffle mode, a random watchface when a new minute is full refresh time
   if (ENABLE_WATCHFACE_CYCLING && !facePinned && newMinute && isFullRefreshTime && !forceFull) {
@@ -491,7 +497,7 @@ void updateDisplay(bool newMinute, bool forceFull, bool initialBoot) {
   }
 
   // Determine refresh mode
-  // FULL refresh: cold boot OR every 10 minutes (for ghosting prevention)
+  // FULL refresh: cold boot OR full refresh time (for ghosting prevention)
   // PARTIAL refresh: All other times (faster, no flicker)
   bool usePartialRefresh = ENABLE_PARTIAL_REFRESH &&
                           !forceFull &&
@@ -512,4 +518,43 @@ void updateDisplay(bool newMinute, bool forceFull, bool initialBoot) {
 
   // Put display in low-power mode
   display.hibernate();
+}
+
+// Initialize display ONLY ONCE per boot
+void initDisplay(bool initialBoot) {
+  if (displayInitialized) return;
+  display.init(ENABLE_SERIAL_DEBUG ? 115200 : 0, initialBoot, 2, false);
+  display.setRotation(0);
+  displayInitialized = true;
+}
+
+/**
+ * Replaces the face with a GrayTimer title screen before the bootloader takes
+ * over: the bootloader never draws, so the last face would stay on the panel,
+ * frozen, until an upload.
+ */
+void showUpdateMode() {
+  initDisplay(false);
+  display.setFullWindow();
+  display.setTextSize(1);
+  display.setTextColor(GxEPD_BLACK);
+  display.firstPage();
+  do {
+    display.fillScreen(GxEPD_WHITE);
+    int16_t y = printCentred("GrayTimer", &Neuton_Bold20pt7b, 60) + 12;
+    y = printCentred("by @haricane8133", &Neuton_Bold10pt7b, y) + 12;
+    printCentred("is now in DFU mode", nullptr, y);  // Adafruit GFX built-in 6x8 font
+  } while (display.nextPage());
+  display.hibernate();
+}
+
+// Prints text centred across the screen with its top at y; returns its bottom
+int16_t printCentred(const char *text, const GFXfont *font, int16_t y) {
+  int16_t x1, y1;
+  uint16_t w, h;
+  display.setFont(font);
+  display.getTextBounds(text, 0, 0, &x1, &y1, &w, &h);
+  display.setCursor((display.width() - w) / 2 - x1, y - y1);
+  display.print(text);
+  return y + h;
 }

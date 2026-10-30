@@ -181,6 +181,9 @@ Estimates (not yet measured):
 | Wake + full refresh, every 10th minute | ~5mA for ~2.5s | 0.4% | ~20µA |
 | **Total** | | | **~80–90µA** |
 
+A face pinned over NFC gets a full refresh only at :00 and :30
+(`PINNED_FULL_REFRESH_INTERVAL`), which saves a little more.
+
 The display refreshes are now almost the whole budget, so the remaining levers
 are fewer refreshes (e.g. `FULL_REFRESH_INTERVAL`) rather than sleep current.
 Each wake also spends ~0.5 s in the bootloader before `setup()` runs.
@@ -210,7 +213,7 @@ Each wake also spends ~0.5 s in the bootloader before `setup()` runs.
 - Duration: ~1-2 seconds
 - Power: ~8mA
 - Effect: Complete redraw, eliminates ghosting
-- Use: Every 10 minutes, watchface changes
+- Use: Every 10 minutes in shuffle mode (with a new face), at :00 and :30 for a pinned face
 
 **Partial Refresh**:
 - Duration: ~200-500ms
@@ -334,9 +337,20 @@ The watch needs Seeed's [XIAO_nRF52840_NFC](https://github.com/limengdu/XIAO_nRF
 library (Sketch → Include Library → Add .ZIP Library).
 
 The watch spends nearly all its time in System OFF, where USB is not running, so
-the automatic upload (1200-baud touch) cannot reach it. **Double-tap the Xiao's
-reset button** to enter the bootloader first. A cold boot (reset button,
-power-on, upload) waits for the serial time line when `ENABLE_TIME_SETUP` and
+the automatic upload (1200-baud touch) cannot reach it. Put it in the bootloader
+first, either way:
+
+- **Over NFC:** write the text `dfu` from a phone (see [the catalog](CATALOG.md)).
+  This works with the watch closed in its case.
+- **Reset button:** double-tap the Xiao's reset button. This is the fallback if
+  a broken firmware no longer answers NFC.
+
+After `dfu` the screen says "GrayTimer is now in DFU mode" and the bootloader
+waits for an upload, as it does after a double-tap. It keeps USB running, which
+drains the battery far faster than sleep, so upload soon. Any upload, even of
+the same firmware, brings the watch back.
+
+A cold boot (reset button, power-on, upload) waits for the serial time line when `ENABLE_TIME_SETUP` and
 `ENABLE_SERIAL_DEBUG` are on; the time can also be set from a phone over NFC
 (see [the catalog](CATALOG.md)).
 
