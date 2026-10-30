@@ -5,7 +5,7 @@
 #include <Adafruit_GFX.h>
 #include "bitmaps/Bitmaps200x200.h"
 
-// E-Paper Display Pin Definitions (GoodDisplay 1.54" - GDEH0154D67)
+// E-Paper Display Pin Definitions (GoodDisplay 1.54" - GDEY0154D67)
 #define EPD_MOSI  D10  // SPI MOSI - Hardware SPI (labelled DAT / DIN / SDA on breakouts)
 #define EPD_SCK   D8   // SPI Clock - Hardware SPI (labelled SCL / CLK / SCK on breakouts)
 #define EPD_CS    D1   // Chip Select (CS) - GPIO

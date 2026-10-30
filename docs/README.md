@@ -180,7 +180,7 @@ Preview of available watchfaces:
 - Try disabling partial refresh: `const bool ENABLE_PARTIAL_REFRESH = false;`
 
 **Display is garbled**
-- Verify correct model (GDEH0154D67)
+- Verify correct model (GDEY0154D67, ribbon FPC-B001; GDEH0154D67 works the same)
 - Check ground connection
 - Ensure proper SPI wiring
 
@@ -327,7 +327,7 @@ pip3 install Pillow
 | Specification | Details |
 |---------------|---------|
 | **MCU** | Nordic nRF52840 (ARM Cortex-M4, 64MHz, 1MB Flash, 256KB RAM) |
-| **Display** | GoodDisplay GDEH0154D67 (1.54", 200×200, SPI, E-Ink) |
+| **Display** | GoodDisplay GDEY0154D67 (1.54", 200×200, SPI, E-Ink) |
 | **RTC** | Micro Crystal RV-8803 (I2C, ±3ppm, 0.24µA) |
 | **Power** | 3.7V LiPo, 300-500mAh recommended |
 | **Update Latency** | <3 seconds during watch face refresh |

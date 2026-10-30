@@ -9,7 +9,7 @@ Detailed hardware information for the e-paper watch project.
 | Component | Specification | Notes |
 |-----------|---------------|-------|
 | MCU | Seeed Xiao nRF52840 | Nordic nRF52840, 64MHz, 1MB Flash, 256KB RAM, BLE 5.0 |
-| Display | GoodDisplay GDEH0154D67 | 1.54", 200×200, SPI, partial refresh capable |
+| Display | GoodDisplay GDEY0154D67 (ribbon marked FPC-B001) | 1.54", 200×200, SPI, partial refresh capable; driven with GxEPD2's `GxEPD2_154_D67` |
 | Display adapter | GoodDisplay DESPI-C02 | 24-pin FPC breakout with the high-voltage boost; RESE switch |
 | RTC | SmartElex RV-8803 module | I2C, ±3ppm temperature compensated, 0.24µA, INT wakes the MCU, onboard backup cell |
 | Battery | LiPo 3.7V | Recommend 300-500mAh, JST connector |
@@ -268,7 +268,7 @@ next to the ribbon for chips or cracks).
 - Check SPI connections
 - Verify ground is common
 - Lower SPI speed (library handles this)
-- Ensure correct display model (GDEH0154D67)
+- Ensure correct display model (GDEY0154D67, ribbon FPC-B001; GDEH0154D67 works the same)
 
 **Ghosting**:
 - Increase full refresh frequency

@@ -43,6 +43,7 @@ The watch sleeps in nRF52840 System OFF.
 - `0` turns on shuffle.
 - `N` pins face N.
 - `YYYY-MM-DD HH:MM:SS` sets the clock.
+- `refresh` does a full refresh, to clear ghosting.
 - `dfu` puts it in the bootloader for a USB upload.
 
 Reading the tag gives a status text from `writeStatusRecord`.

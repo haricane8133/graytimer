@@ -17,6 +17,7 @@ Android):
    | `0` | Shuffle mode: a random face every 10 minutes, starting with a new one now |
    | `1`, `2`, ... | Shows that face and keeps it (numbers below); it flashes for a full refresh at :00 and :30 |
    | `2026-10-25 14:30:00` | Sets the date and time: `YYYY-MM-DD HH:MM:SS`, 24-hour, all of it |
+   | `refresh` | Full refresh now, to clear ghosting. The face and mode stay as they are |
    | `dfu` | Firmware update mode: the screen says "GrayTimer is now in DFU mode" and the watch waits for an upload over USB-C. Any upload, even of the same firmware, brings it back ([how to upload](HARDWARE.md#programming)) |
 
 2. Tap **Write** and hold the phone to the watch's antenna. The phone's field

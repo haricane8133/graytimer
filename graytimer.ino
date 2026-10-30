@@ -16,10 +16,13 @@
 // back to false and re-flash for deployment. Or set it from a phone over NFC
 // (see the NFC section below).
 const bool ENABLE_TIME_SETUP = false;  // Enable serial time input on cold boot
-const bool ENABLE_PARTIAL_REFRESH = true;  // Enable partial refresh for faster updates
-const uint8_t FULL_REFRESH_INTERVAL = 10;  // Full refresh when minute % N == 0 (e.g., :00, :10, :20, etc.)
-const uint8_t PINNED_FULL_REFRESH_INTERVAL = 30;  // Same for a face pinned over NFC (:00, :30)
-const bool ENABLE_WATCHFACE_CYCLING = true;  // Shuffle mode: a random face every 10 mins (phone writes 0)
+const bool ENABLE_PARTIAL_REFRESH = true;  // Partial refresh between full ones (false = full refresh every minute)
+// A full refresh clears the ghosting that partial refreshes leave behind, at
+// the cost of a flash and more power. It runs when minute % N == 0, so use a
+// divisor of 60. A phone can force one at any time by writing "refresh".
+const uint8_t FULL_REFRESH_INTERVAL = 10;  // Shuffle mode, with a new face (:00, :10, :20, ...)
+const uint8_t PINNED_FULL_REFRESH_INTERVAL = 30;  // A face pinned over NFC (:00, :30)
+const bool ENABLE_WATCHFACE_CYCLING = true;  // Shuffle mode: a random face every FULL_REFRESH_INTERVAL mins (phone writes 0)
 const bool ENABLE_SERIAL_DEBUG = false;  // Disable Serial to save ~1-2mA power (set false for deployment)
 
 // Serial debug macros (only print if enabled)
@@ -218,6 +221,8 @@ uint8_t pickNextWatchFace(uint8_t current) {
 //   1, 2, ...            -> pin that face (numbers in docs/CATALOG.md)
 //   YYYY-MM-DD HH:MM:SS  -> set the clock (24-hour). It is applied when the
 //                           phone's field drops, i.e. at the phone's tick.
+//   refresh              -> full refresh now, same face and mode, to clear
+//                           ghosting (any case, as for dfu)
 //   dfu                  -> wait in the bootloader for a USB upload, as a
 //                           double-tap of reset does (any case: phones
 //                           capitalise the first letter)
@@ -318,6 +323,7 @@ bool applyPhoneCommand() {
   DEBUG_PRINT("NFC: ");
   DEBUG_PRINTLN(s);
 
+  if (strcasecmp(s, "refresh") == 0) return true;  // the redraw is a full refresh
   if (strcasecmp(s, "dfu") == 0) {
     showUpdateMode();
     enterSerialDfu();  // resets into the bootloader; never returns
@@ -470,7 +476,8 @@ void goToSleep() {
  *
  * newMinute:   this draw is for a minute rollover; in shuffle mode a new face
  *              is picked at :00, :10, ...
- * forceFull:   full refresh regardless of the minute (cold boot, phone command)
+ * forceFull:   full refresh regardless of the minute (cold boot, phone command);
+ *              never picks a new face
  * initialBoot: the panel content is unknown, so GxEPD2 must not assume the
  *              previous frame is still in controller RAM. On a wake the panel
  *              kept it through hibernate, so partial refresh works.
