@@ -10,7 +10,7 @@ Detailed hardware information for the e-paper watch project.
 |-----------|---------------|-------|
 | MCU | Seeed Xiao nRF52840 | Nordic nRF52840, 64MHz, 1MB Flash, 256KB RAM, BLE 5.0 |
 | Display | GoodDisplay GDEY0154D67 (ribbon marked FPC-B001) | 1.54", 200×200, SPI, partial refresh capable; driven with GxEPD2's `GxEPD2_154_D67` |
-| Display adapter | GoodDisplay DESPI-C02 | 24-pin FPC breakout with the high-voltage boost; RESE switch |
+| Display board | GoodDisplay DESPI-C02 adapter **or** Waveshare 1.54" e-Paper Module | Either works; both have the panel's high-voltage boost. The DESPI-C02 takes the bare panel's 24-pin ribbon and has a RESE switch. The Waveshare module comes with the panel already attached |
 | RTC | SmartElex RV-8803 module | I2C, ±3ppm temperature compensated, 0.24µA, INT wakes the MCU, onboard backup cell |
 | Battery | LiPo 3.7V | Recommend 300-500mAh, JST connector |
 | NFC antenna | 13.56 MHz coil | On the Xiao's NFC pads; a phone picks the face or sets the time |
@@ -39,6 +39,7 @@ D9  (P1.14) | GPIO (BUSY)   | BUSY               | Busy signal from display
 ```
 
 DESPI-C02 labels: SDI = MOSI (D10), SCK = SCK (D8), RES = RST (D0), D/C = DC (D3).
+Waveshare module labels: DIN = MOSI (D10), CLK = SCK (D8), RST (D0), DC (D3).
 
 **BUSY note**: the firmware reads BUSY on **D9** so each wake ends as soon as the
 panel finishes instead of sleeping through worst-case fixed delays. If BUSY
@@ -231,14 +232,15 @@ Each wake also spends ~0.5 s in the bootloader before `setup()` runs.
 3. **Verify voltage** is 3.3V at all component inputs
 4. **Secure connections** - loose wires cause intermittent issues
 5. **RTC power LED** - cut the RV-8803 board's LED jumper before closing the case
-6. **Display ribbon cable** - handle carefully, easy to damage. The DESPI-C02
+6. **Display ribbon cable** (DESPI-C02 only; the Waveshare module comes with
+   the panel attached) - handle carefully, easy to damage. The DESPI-C02
    connector contacts both faces, so a flipped ribbon still connects but with
    the pin order reversed. Match pin 1 (or the orientation the panel had on its
    original board) before powering, then confirm with `ENABLE_SERIAL_DEBUG`
    on: GxEPD2 printing `_Update_Full` of about 2,180,000 µs on a cold boot
    means it is seated correctly. Keep case edges
    off the two glass corners beside the ribbon.
-7. **DESPI-C02 RESE switch** - start at 0.47Ω
+7. **DESPI-C02 RESE switch** - start at 0.47Ω (the Waveshare module has none)
 8. **Button debouncing** - add 100nF capacitor if implementing button
 
 ---
@@ -260,8 +262,8 @@ Each wake also spends ~0.5 s in the bootloader before `setup()` runs.
 The ribbon is reversed or not seated (see the ribbon note in Assembly Notes).
 
 **`_Update_Full` ≈ 2,180,000 µs but the image never changes**: the controller
-works but the high voltage does not reach the ink. Try the DESPI-C02 RESE switch
-in its other position; otherwise the panel is damaged (check the glass corners
+works but the high voltage does not reach the ink. On the DESPI-C02, try the RESE
+switch in its other position; otherwise the panel is damaged (check the glass corners
 next to the ribbon for chips or cracks).
 
 **Display is garbled**:

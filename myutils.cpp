@@ -4,7 +4,7 @@
 // through worst-case fixed delays, which shortens every wake. If BUSY
 // misbehaves, pass -1 here to fall back to fixed delays.
 //
-// Panel:GDEY0154D67 (ribbon FPC-B001) 200x200, SSD1681. GxEPD2's own
+// Panel: GDEY0154D67 (ribbon FPC-B001) 200x200, SSD1681. GxEPD2's own
 // GxEPD2_154_GDEY0154D67 class sends the same commands but a shorter full
 // refresh, which clears less ghosting, so the GDEH0154D67 class is kept on purpose.
 GxEPD2_BW<GxEPD2_154_D67, GxEPD2_154_D67::HEIGHT> display(

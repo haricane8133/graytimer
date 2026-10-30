@@ -29,7 +29,8 @@
 ### Hardware Requirements
 
 - **MCU**: Seeed Xiao nRF52840
-- **Display**: GoodDisplay 1.54" (GDEH0154D67 / GDEY0154D67) on a GoodDisplay DESPI-C02 adapter
+- **Display**: GoodDisplay 1.54" e-paper (GDEY0154D67 / GDEH0154D67). Either board works: the bare panel on a
+  GoodDisplay DESPI-C02 adapter, or a Waveshare 1.54" e-Paper Module, which comes with the panel attached
 - **RTC**: RV-8803 (SmartElex module), INT wired to D2 to wake the MCU from System OFF
 - **Battery**: LiPo 3.7V (300-500mAh recommended)
 - **NFC antenna**: on the Xiao's NFC pads; a phone's field wakes the watch

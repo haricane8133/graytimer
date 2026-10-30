@@ -8,7 +8,7 @@ A guide for AI agents working on graytimer. It is the map; the details live in
 A hand-built e-paper smartwatch:
 
 - **MCU:** Seeed Xiao nRF52840.
-- **Display:** 1.54" 200×200 1-bit GoodDisplay panel on a DESPI-C02 adapter.
+- **Display:** 1.54" 200×200 1-bit GoodDisplay panel (GDEY0154D67), on a DESPI-C02 adapter or a Waveshare 1.54" module. Both work.
 - **RTC:** RV-8803.
 - **Phone link:** NFC tag, no app needed.
 
