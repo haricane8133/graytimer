@@ -12,7 +12,7 @@ A hand-built e-paper smartwatch:
 - **RTC:** RV-8803.
 - **Phone link:** NFC tag, no app needed.
 
-It shows the time over a watchface (a bitmap plus fonts). There are 115 watchfaces, and it shuffles to a new one every 10 minutes unless a phone pins one over NFC.
+It shows the time over a watchface (a bitmap plus fonts). There are 116 watchfaces, and it shuffles to a new one every 10 minutes unless a phone pins one over NFC.
 
 ## Where things are
 
@@ -57,7 +57,7 @@ Reading the tag gives a status text from `writeStatusRecord`.
   - To retire a face, replace its line with `nullptr,  // N retired`. Never delete or reorder lines.
   - Keep the `// N` comment on every line: `generate_catalog.py` checks them.
   - There can be at most 127 faces, because the number is stored in 7 bits.
-- **Flash is about 96% full.** Store new art faces cropped (`write_header(..., crop=True)` in `generate_geometric.py`), then compile and check the size.
+- **Flash is about 98% full.** Store new art faces cropped (`write_header(..., crop=True)` in `generate_geometric.py`), then compile and check the size.
 - **Artwork is 1-bit at 200×200.**
   - Dither photos at their final size (`dither_source.py`) and never resample them afterwards.
   - Line art and geometric faces are thresholded, not dithered.

@@ -6,7 +6,7 @@ Complete documentation for the e-paper watch project.
 
 ## Documentation Index
 
-- **[Watchface Catalog](CATALOG.md)** - Browse all 115 watchfaces by collection, and pick one or set the time from a phone over NFC
+- **[Watchface Catalog](CATALOG.md)** - Browse all 116 watchfaces by collection, and pick one or set the time from a phone over NFC
 - **[Gallery](GALLERY.md)** - Photos of the finished watch
 - **[WatchFace API Reference](API.md)** - Complete API documentation for creating custom watchfaces
 - **[Hardware Guide](HARDWARE.md)** - Detailed hardware specifications, wiring, and assembly
@@ -16,7 +16,7 @@ Complete documentation for the e-paper watch project.
 ## Features
 
 - **Display**: 200×200 monochrome e-paper (1.54", 200 DPI)
-- **Watchfaces**: 115+ pre-configured with custom fonts
+- **Watchfaces**: 116+ pre-configured with custom fonts
 - **Time Keeping**: RV-8803 RTC (±3ppm), wakes the MCU from System OFF every minute
 - **NFC**: a phone writes a face number or the date and time with any NFC tag app; its field wakes the watch
 - **Refresh Modes**: Partial (fast) and full (ghosting-free)
@@ -130,7 +130,7 @@ WatchFace* allWatchFaces[] = {
 
 ## Watchfaces
 
-**[📋 See all 115 watchfaces in the catalog →](CATALOG.md)**
+**[📋 See all 116 watchfaces in the catalog →](CATALOG.md)**
 
 Preview of available watchfaces:
 
@@ -165,7 +165,7 @@ Preview of available watchfaces:
   </tr>
 </table>
 
-**Collections**: Star Wars (13) • Harry Potter (10) • Club Penguin (8) • Animals (9) • Other Characters (11) • Horizon Zero Dawn (6) • Hades (20) • Music & Entertainment (8) • Nature & Landscapes (9) • Space (7) • Cultural & Spiritual (6) • Everyday Things (3) • Abstract & Patterns (5)
+**Collections**: Star Wars (13) • Harry Potter (10) • Club Penguin (8) • Animals (9) • Other Characters (11) • Horizon Zero Dawn (6) • Hades (20) • Prince of Persia (1) • Music & Entertainment (8) • Nature & Landscapes (9) • Space (7) • Cultural & Spiritual (6) • Everyday Things (3) • Abstract & Patterns (5)
 
 ---
 

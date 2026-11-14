@@ -70,6 +70,10 @@
 #include "myfonts/CaesarDressing_Regular20pt7b.h"
 #include "myfonts/CaesarDressing_Regular15pt7b.h"
 #include "myfonts/CaesarDressing_Regular10pt7b.h"
+#include "myfonts/PrinceOfPersia1x7b.h"
+#include "myfonts/PrinceOfPersia2x7b.h"
+#include "myfonts/PrinceOfPersiaDigits4x7b.h"
+#include "dfu_screen.h"
 
 // include all watchfaces used, here
 #include "mywatchfaces/atat.h"
@@ -191,6 +195,7 @@
 #include "mywatchfaces/coinpurse.h"
 #include "mywatchfaces/rose.h"
 #include "mywatchfaces/luckytooth.h"
+#include "mywatchfaces/persia.h"
 
 
 extern GxEPD2_BW<GxEPD2_154_D67, GxEPD2_154_D67::HEIGHT> display;

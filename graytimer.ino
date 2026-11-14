@@ -160,6 +160,7 @@ WatchFace* allWatchFaces[] = {
   new WatchFace_coinpurse(),  // 113
   new WatchFace_rose(),  // 114
   new WatchFace_luckytooth(),  // 115
+  new WatchFace_persia(),  // 116
 };
 static_assert(sizeof(allWatchFaces) / sizeof(allWatchFaces[0]) <= 128,
               "face number is saved in 7 bits of RTC RAM");
@@ -583,9 +584,11 @@ void enterUpdateMode() {
 }
 
 /**
- * Replaces the face with a GrayTimer title screen and a status line before the
- * bootloader takes over: the bootloader never draws, so the last face would
- * stay on the panel, frozen, until an upload.
+ * Replaces the face with the GrayTimer title screen (dfu_screen.h, made by
+ * watchfaceutils/generate_dfu_screen.py) and a status line in the white strip
+ * across its top, before the bootloader takes over: the bootloader never
+ * draws, so the last face would stay on the panel, frozen, until an upload.
+ * The status fits about 27 characters.
  */
 void showUpdateMode(const char *status, bool partial) {
   initDisplay(false);
@@ -596,9 +599,8 @@ void showUpdateMode(const char *status, bool partial) {
   display.firstPage();
   do {
     display.fillScreen(GxEPD_WHITE);
-    int16_t y = printCentred("GrayTimer", &Neuton_Bold20pt7b, 60) + 12;
-    y = printCentred("by @haricane8133", &Neuton_Bold10pt7b, y) + 12;
-    printCentred(status, nullptr, y);  // Adafruit GFX built-in 6x8 font
+    display.drawBitmap(0, 0, dfu_screen, 200, 200, GxEPD_BLACK);
+    printCentred(status, &PrinceOfPersia1x7b, 3);
   } while (display.nextPage());
   display.hibernate();
 }

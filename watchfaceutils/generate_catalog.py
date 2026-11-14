@@ -56,6 +56,9 @@ GROUPS = [
         ("cosmicegg", "Cosmic Egg*"), ("hourglass", "Bone Hourglass*"), ("skullearring", "Skull Earring*"),
         ("coinpurse", "Chthonic Coin Purse*"), ("rose", "Eternal Rose*"), ("luckytooth", "Lucky Tooth*"),
     ]),
+    ("Prince of Persia", [
+        ("persia", "Prince of Persia*"),
+    ]),
     ("Music & Entertainment", [
         ("guitar1", "Guitar 1"), ("guitar2", "Guitar 2"), ("ps", "PlayStation"), ("prism", "Prism (Dark Side of the Moon)*"),
         ("vinyl", "Vinyl*"), ("cassette", "Cassette*"), ("equalizer", "Equalizer*"), ("headphones", "Headphones*"),

@@ -3,3 +3,6 @@ __pycache__/
 *.skb
 hardware/tests/
 local/
+.DS_Store
+# game rips kept so the pop fonts and screens can be regenerated
+!watchfaceutils/sources/*/raw/

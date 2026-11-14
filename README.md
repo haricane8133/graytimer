@@ -1,4 +1,9 @@
-# E-Paper Watch
+<h1 align="center">
+  <picture>
+    <source media="(prefers-color-scheme: dark)" srcset="./docs/pics/banner_dark.png">
+    <img src="./docs/pics/banner_light.png" alt="Gray Timer: a watch made by Hari Rajesh" width="560">
+  </picture>
+</h1>
 
 * A fully customizable, ePaper, battery-optimized smartwatch.
 * Auto shuffles between available watchfaces every 10 mins.
@@ -18,7 +23,7 @@
   </tr>
 </table>
 
-**[📋 Watchface catalog: all 115 watchfaces, and how to pick one from your phone →](docs/CATALOG.md)**
+**[📋 Watchface catalog: all 116 watchfaces, and how to pick one from your phone →](docs/CATALOG.md)**
 
 [📸 Photos of the finished watch](docs/GALLERY.md)
 
@@ -75,7 +80,7 @@ graytimer/
 ├── RTCManager.h            # Time management
 │
 ├── myfonts/                # Custom GFX fonts (66 fonts)
-├── mywatchfaces/           # Watchface definitions (115 watchfaces)
+├── mywatchfaces/           # Watchface definitions (116 watchfaces)
 │
 ├── hardware/               # Case models
 ├── watchfaceutils/         # Python development tools

@@ -1259,6 +1259,21 @@ def hari():
     ]
 
 
+@face
+def persia():
+    """Prince of Persia (1989, DOS) title art, dithered at its native pixels; time on a black band."""
+    c = Canvas()
+    art = Image.open(SRC_DIR / "pop/raw/title_art.png").convert("RGB").convert("L").crop((60, 0, 260, 138))
+    art = art.point(lambda v: min(255, int(255 * (v / 255) ** 0.6)))  # the art is dark: brighten before dithering
+    c.exact = Image.new("L", (W, W), 0)  # black below the art, for the white time and date
+    c.exact.paste(art.convert("1").convert("L"), (0, 0))
+    return c, [
+        ("layout", 1), ("noAMPM", "true"),
+        ("text1x", -1), ("text1y", 73), ("text1color", "GxEPD_WHITE"), ("text1font", "&PrinceOfPersiaDigits4x7b"),
+        ("text2x", -1), ("text2y", 90), ("text2color", "GxEPD_WHITE"), ("text2font", "&PrinceOfPersia2x7b"),
+    ]
+
+
 # ---------------------------------------------------------------------------
 # Batch 5 - Hades items and keepsakes (dithered game art from sources/hades), set in Caesar Dressing
 # ---------------------------------------------------------------------------
