@@ -352,6 +352,12 @@ waits for an upload, as it does after a double-tap. It keeps USB running, which
 drains the battery far faster than sleep, so upload soon. Any upload, even of
 the same firmware, brings the watch back.
 
+Without a computer on USB, `dfu` first shows "Plug in USB within 2 min" and
+waits for one; if none comes in that time, the face comes back. The bootloader
+gives a software DFU request only 3 s to see a computer on USB and then restarts
+the watch, so the sketch hands over only once a computer has connected. A
+charger, or a cable that only carries power, never counts.
+
 A cold boot (reset button, power-on, upload) waits for the serial time line when `ENABLE_TIME_SETUP` and
 `ENABLE_SERIAL_DEBUG` are on; the time can also be set from a phone over NFC
 (see [the catalog](CATALOG.md)).

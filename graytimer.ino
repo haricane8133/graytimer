@@ -1,5 +1,6 @@
 #include "myutils.h"
 #include <XIAO_nRF52840_NFC.h>
+#include <Adafruit_TinyUSB.h>  // TinyUSBDevice.mounted() for the dfu command
 
 // systemOff() and readResetReason() come from the Adafruit-based Seeed nRF52 core.
 #if !defined(ARDUINO_ARCH_NRF52)
@@ -225,12 +226,16 @@ uint8_t pickNextWatchFace(uint8_t current) {
 //                           ghosting (any case, as for dfu)
 //   dfu                  -> wait in the bootloader for a USB upload, as a
 //                           double-tap of reset does (any case: phones
-//                           capitalise the first letter)
+//                           capitalise the first letter). Without a
+//                           computer on USB it first waits DFU_USB_WAIT_MS for
+//                           one: see enterUpdateMode()
 // Anything else is ignored. Reading the tag shows a status text: the watch, a
 // link to the catalog, the face and mode, and the time when the phone woke it.
 // Needs Seeed's XIAO_nRF52840_NFC library. NEVER run the core's nfc_to_gpio
 // example: it permanently turns the NFC pads into GPIOs.
 const uint32_t NFC_IDLE_MS = 3000;  // a phone's field comes and goes while it polls
+const uint32_t DFU_USB_WAIT_MS = 120000;  // after dfu without a computer, how long to wait for one
+const uint32_t DFU_USB_GAP_MS = 1000;  // off USB between the sketch and the bootloader
 
 // Swallows the NFC library's log
 class NullPrint : public Print {
@@ -325,8 +330,8 @@ bool applyPhoneCommand() {
 
   if (strcasecmp(s, "refresh") == 0) return true;  // the redraw is a full refresh
   if (strcasecmp(s, "dfu") == 0) {
-    showUpdateMode();
-    enterSerialDfu();  // resets into the bootloader; never returns
+    enterUpdateMode();  // returns only if USB never came
+    return true;        // the face goes back over the update screen
   }
 
   int n = (len >= 1 && len <= 3) ? digits(s, len) : -1;
@@ -535,14 +540,57 @@ void initDisplay(bool initialBoot) {
   displayInitialized = true;
 }
 
+// Waits up to ms for a computer to enumerate the sketch's own USB device (the
+// core starts it at boot); true once one has
+bool waitForUsbHost(uint32_t ms) {
+  uint32_t start = millis();
+  while (!TinyUSBDevice.mounted()) {
+    if (millis() - start > ms) return false;
+    delay(50);
+  }
+  return true;
+}
+
 /**
- * Replaces the face with a GrayTimer title screen before the bootloader takes
- * over: the bootloader never draws, so the last face would stay on the panel,
- * frozen, until an upload.
+ * The phone's dfu command. The bootloader (Adafruit 0.6.2) gives a software
+ * DFU request only 3 s to enumerate on USB and otherwise resets back into the
+ * watch, so on battery it would return at once. Only a double-tap of reset
+ * gets no timeout, and software cannot fake that (the bootloader checks for a
+ * pin reset). So wait here until a computer is on USB, then jump to the
+ * bootloader. Returns if none comes within DFU_USB_WAIT_MS.
+ *
+ * It waits for a USB host, not USB power: a charger gives power but no host.
+ *
+ * Then it leaves USB cleanly and stays off it for DFU_USB_GAP_MS before the
+ * reset. Resetting straight from a connected sketch made the bootloader's
+ * device miss its 3 s (2 of 3 tries, through a monitor's USB hub): the
+ * computer saw the sketch vanish and the bootloader arrive almost at once.
+ * After a gap the bootloader arrives like a fresh plug-in.
  */
-void showUpdateMode() {
+void enterUpdateMode() {
+  // A cable already in may still be enumerating after the wake
+  bool waited = !waitForUsbHost(1500);
+  if (waited) {
+    showUpdateMode("Plug in USB within 2 min", false);
+    if (!waitForUsbHost(DFU_USB_WAIT_MS)) return;
+  }
+  TinyUSBDevice.detach();
+  uint32_t detachedMs = millis();
+  // Partial if the waiting screen is up: no flash
+  showUpdateMode("is now in DFU mode", waited);
+  while (millis() - detachedMs < DFU_USB_GAP_MS) delay(10);
+  enterSerialDfu();  // resets into the bootloader; never returns
+}
+
+/**
+ * Replaces the face with a GrayTimer title screen and a status line before the
+ * bootloader takes over: the bootloader never draws, so the last face would
+ * stay on the panel, frozen, until an upload.
+ */
+void showUpdateMode(const char *status, bool partial) {
   initDisplay(false);
-  display.setFullWindow();
+  if (partial) display.setPartialWindow(0, 0, display.width(), display.height());
+  else display.setFullWindow();
   display.setTextSize(1);
   display.setTextColor(GxEPD_BLACK);
   display.firstPage();
@@ -550,7 +598,7 @@ void showUpdateMode() {
     display.fillScreen(GxEPD_WHITE);
     int16_t y = printCentred("GrayTimer", &Neuton_Bold20pt7b, 60) + 12;
     y = printCentred("by @haricane8133", &Neuton_Bold10pt7b, y) + 12;
-    printCentred("is now in DFU mode", nullptr, y);  // Adafruit GFX built-in 6x8 font
+    printCentred(status, nullptr, y);  // Adafruit GFX built-in 6x8 font
   } while (display.nextPage());
   display.hibernate();
 }
