@@ -333,5 +333,9 @@ struct WatchFace_orion : public WatchFace {
     text2y = 90;
     text2color = GxEPD_WHITE;
     text2font = &ToughCookiesBold_owZ1d10pt7b;
+    bitmap_x_start = 0;
+    bitmap_y_start = 0;
+    bitmap_x_end = 200;
+    bitmap_y_end = 200;
   }
 };

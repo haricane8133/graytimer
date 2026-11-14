@@ -331,5 +331,9 @@ struct WatchFace_sunburst : public WatchFace {
     text2x = -1;
     text2y = 57;
     text2font = &Bootle_4B9l10pt7b;
+    bitmap_x_start = 0;
+    bitmap_y_start = 0;
+    bitmap_x_end = 200;
+    bitmap_y_end = 200;
   }
 };

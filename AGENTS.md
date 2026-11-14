@@ -57,7 +57,7 @@ Reading the tag gives a status text from `writeStatusRecord`.
   - To retire a face, replace its line with `nullptr,  // N retired`. Never delete or reorder lines.
   - Keep the `// N` comment on every line: `generate_catalog.py` checks them.
   - There can be at most 127 faces, because the number is stored in 7 bits.
-- **Flash is about 98% full.** Store new art faces cropped (`write_header(..., crop=True)` in `generate_geometric.py`), then compile and check the size.
+- **Flash is about 87% full, and the real limit is lower than the IDE says.** The bootloader rejects an upload over about 790 KB (a 799 KB build failed mid-upload; 790 KB and 706 KB worked), though the IDE allows 811 KB. Generated faces are stored cropped to their ink (`write_header(..., crop=True)` in `generate_geometric.py`); crop new art too, then compile and check the size.
 - **Artwork is 1-bit at 200×200.**
   - Dither photos at their final size (`dither_source.py`) and never resample them afterwards.
   - Line art and geometric faces are thresholded, not dithered.

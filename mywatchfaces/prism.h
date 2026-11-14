@@ -331,5 +331,9 @@ struct WatchFace_prism : public WatchFace {
     text1font = &CompactaBT20pt7b;
     text2color = GxEPD_WHITE;
     text2font = &CompactaBT10pt7b;
+    bitmap_x_start = 0;
+    bitmap_y_start = 0;
+    bitmap_x_end = 200;
+    bitmap_y_end = 200;
   }
 };

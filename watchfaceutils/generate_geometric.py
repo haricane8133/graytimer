@@ -1317,7 +1317,7 @@ def main(names):
     names = names or list(FACES)
     for n in names:
         canvas, cfg = FACES[n]()
-        out = write_header(n, canvas.to_bits(), cfg, crop=n in HADES)
+        out = write_header(n, canvas.to_bits(), cfg, crop=True)
         print(f"wrote {out}")
 
 
