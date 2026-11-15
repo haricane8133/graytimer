@@ -125,7 +125,7 @@ went on order.
 And that afternoon, the finished watch:
 
 <p align="center">
-  <img src="./pics/hero_crop.jpg" alt="Gray Timer: a watch made by Hari Rajesh" width="300"/>
+  <img src="./pics/hero_crop.jpg" alt="Gray Timer: a watch made by Hari &amp; Rajesh" width="300"/>
 </p>
 
 More photos are in the [gallery](GALLERY.md).

@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """
 Build the README title art: the GRAY TIMER wordmark (sources/pop/processed/wordmark.png)
-with "A watch made by Hari Rajesh" under it in the Prince of Persia in-game font
+with "A watch made by Hari & Rajesh" under it in the Prince of Persia in-game font
 (../myfonts/PrinceOfPersia1x7b.h), both on one pixel grid and centred on each other.
 
 Usage:
@@ -21,7 +21,7 @@ from PIL import Image, ImageDraw, ImageOps
 from render_watchface import GFXFont
 
 HERE = Path(__file__).parent
-CREDIT = "A watch made by Hari Rajesh"
+CREDIT = "A watch made by Hari & Rajesh"
 GAP = 4      # rows between the wordmark and the credit
 SCALE = 3    # screen pixels per art pixel
 

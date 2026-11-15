@@ -9,7 +9,7 @@
 <table>
   <tr>
     <td rowspan="3" align="center">
-      <img src="./docs/pics/hero.jpg" alt="Gray Timer: a watch made by Hari Rajesh" width="300"/>
+      <img src="./docs/pics/hero.jpg" alt="Gray Timer: a watch made by Hari &amp; Rajesh" width="300"/>
     </td>
     <td align="center" valign="top">
       <img src="./docs/pics/photo_gem.jpg" alt="The watch showing a gem watchface" width="200"/><br/>

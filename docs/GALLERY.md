@@ -7,7 +7,7 @@ read [the build story](BUILD.md).
 ## Gray Timer V2
 
 <p align="center">
-  <img src="./pics/hero.jpg" alt="Gray Timer: a watch made by Hari Rajesh" width="360"/>
+  <img src="./pics/hero.jpg" alt="Gray Timer: a watch made by Hari &amp; Rajesh" width="360"/>
 </p>
 
 <table>
