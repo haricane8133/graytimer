@@ -24,6 +24,7 @@ It shows the time over a watchface (a bitmap plus fonts). There are 116 watchfac
 | Rendering, display driver, includes of every font and face | [myutils.cpp](myutils.cpp), [myutils.h](myutils.h) |
 | All faces by collection with numbers and previews, and the phone (NFC) commands | [docs/CATALOG.md](docs/CATALOG.md) |
 | Photos of the finished watch | [docs/GALLERY.md](docs/GALLERY.md) |
+| The V2 build story in photos | [docs/BUILD.md](docs/BUILD.md) |
 | Python tools: generate, dither, preview, convert fonts | docstrings at the top of each `watchfaceutils/*.py` |
 | Licences and sources of third-party art and fonts | `watchfaceutils/sources/*/README.md` |
 | Notes on the user's own unit: repair log, damaged pads (gitignored, may be absent) | `local/` |
