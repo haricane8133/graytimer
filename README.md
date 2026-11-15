@@ -46,7 +46,7 @@
 - **RTC**: RV-8803 (SmartElex module), with INT wired to D2 so it can wake the Xiao
 - **Battery**: LiPo 3.7V, 300-500mAh
 - **NFC antenna**: on the Xiao's NFC pads
-- **Case**: 3D print the lid and box in [`/hardware`](hardware)
+- **Case**: 3D print the main box and lid in [`/hardware`](hardware) ([print notes](docs/HARDWARE.md#case))
 
 **[Wiring, power and assembly →](docs/HARDWARE.md)**
 

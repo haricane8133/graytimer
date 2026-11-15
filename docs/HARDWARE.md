@@ -14,6 +14,7 @@ Detailed hardware information for the e-paper watch project.
 | RTC | SmartElex RV-8803 module | I2C, ±3ppm temperature compensated, 0.24µA, INT wakes the MCU, onboard backup cell |
 | Battery | LiPo 3.7V | Recommend 300-500mAh, JST connector |
 | NFC antenna | 13.56 MHz coil | On the Xiao's NFC pads; a phone picks the face or sets the time |
+| Case | 3D-printed main box and lid | Models in [`/hardware`](../hardware); see [Case](#case) |
 | Button | Tactile switch (optional) | For future features |
 
 ---
@@ -225,6 +226,31 @@ Each wake also spends ~0.5 s in the bootloader before `setup()` runs.
 
 ---
 
+## Case
+
+The case is two 3D-printed parts, and the files are in
+[`/hardware`](../hardware). In the file names, *mainbox* is the main box and
+*moodi* is the lid.
+
+| Part | Files | Size (mm) |
+|------|-------|-----------|
+| Main box: holds the battery, boards and antenna | `mainbox__so_final_v3_curved.stl` / `.skp` | 66.4 × 39.8 × 18.0 |
+| Lid: the top, with the window for the screen | `moodi_so_final_v3_curved.stl` / `.skp` | 54.8 × 39.8 × 6.0 |
+
+- **`.stl`** is the model to slice and print.
+- **`.skp`** is the SketchUp source, for changing the design.
+- **`CFFFP_*.gcode`** is each part already sliced, in Cura 4.11 for a Marlin
+  printer: 0.2 mm layers, a brim, 195 °C nozzle and 60 °C bed (PLA). The main
+  box takes about 75 minutes and 4.7 m of filament, the lid about 40 minutes
+  and 2.6 m. Use these only if your printer matches; otherwise slice the STL
+  yourself.
+
+The build story has [photos of the case](BUILD.md#7-to-14-november-the-case)
+being printed and packed. The first watch's orange case (`lid` and `mainbox`)
+is kept in [`/hardware/v1`](../hardware/v1).
+
+---
+
 ## Assembly Notes
 
 1. **Test components** individually before assembly
@@ -242,6 +268,8 @@ Each wake also spends ~0.5 s in the bootloader before `setup()` runs.
    off the two glass corners beside the ribbon.
 7. **DESPI-C02 RESE switch** - start at 0.47Ω (the Waveshare module has none)
 8. **Button debouncing** - add 100nF capacitor if implementing button
+9. **NFC antenna** - the panel can block the antenna, so try a phone tap with
+   the antenna in its final spot before closing the case
 
 ---
 
