@@ -344,6 +344,22 @@ D2 low.
 
 ## Programming
 
+### Setting up the Arduino IDE
+
+1. **Install the Arduino IDE.**
+2. **Add the Seeed nRF52 boards.** In Preferences → Additional Board URLs, add
+   `https://files.seeedstudio.com/arduino/package_seeeduino_boards_index.json`,
+   then in Tools → Board → Boards Manager, search "Seeed nRF52" and install it.
+3. **Install the libraries** from the Library Manager:
+   - GxEPD2 by Jean-Marc Zingg
+   - Adafruit GFX Library
+   - SparkFun Qwiic RTC RV8803 Arduino Library
+
+   Then add Seeed's [XIAO_nRF52840_NFC](https://github.com/limengdu/XIAO_nRF52840_NFC),
+   which isn't in the Library Manager (Sketch → Include Library → Add .ZIP Library).
+
+### Uploading
+
 Board: **Seeed nRF52 Boards → Seeed XIAO nRF52840** (FQBN
 `Seeeduino:nrf52:xiaonRF52840`), not the mbed "XIAO nRF52840 (No Updates)" board.
 
@@ -362,9 +378,6 @@ Or build and upload from a terminal:
 ```bash
 cd graytimer && LC_ALL=en_US.UTF-8 "/Applications/Arduino IDE.app/Contents/Resources/app/lib/backend/resources/arduino-cli" --config-file ~/.arduinoIDE/arduino-cli.yaml compile --upload -p "$(ls /dev/cu.usbmodem* | head -1)" --fqbn Seeeduino:nrf52:xiaonRF52840 .
 ```
-
-The watch needs Seeed's [XIAO_nRF52840_NFC](https://github.com/limengdu/XIAO_nRF52840_NFC)
-library (Sketch → Include Library → Add .ZIP Library).
 
 The watch spends nearly all its time in System OFF, where USB is not running, so
 the automatic upload (1200-baud touch) cannot reach it. Put it in the bootloader

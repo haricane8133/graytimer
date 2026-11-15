@@ -6,7 +6,7 @@ watchface. Start wherever you like.
 - **[Watchface catalog](CATALOG.md)**: Browse all 116 watchfaces by collection, and pick one or set the time from a phone over NFC
 - **[Gallery](GALLERY.md)**: photos of the finished watch
 - **[Build story](BUILD.md)**: how V2 came together, in photos
-- **[Hardware guide](HARDWARE.md)**: parts, wiring, the case, power, uploading and troubleshooting
+- **[Build guide](HARDWARE.md)**: parts, wiring, the case, power, uploading and troubleshooting
 - **[WatchFace API](API.md)**: every setting a watchface has, and how to place the time on it
 
 **Collections**: Star Wars (13) • Harry Potter (10) • Club Penguin (8) • Animals (9) • Other Characters (11) • Horizon Zero Dawn (6) • Hades (20) • Prince of Persia (1) • Music & Entertainment (8) • Nature & Landscapes (9) • Space (7) • Cultural & Spiritual (6) • Everyday Things (3) • Abstract & Patterns (5)

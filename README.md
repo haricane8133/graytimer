@@ -5,6 +5,9 @@
 - 3D print yourself a case. Sew up a regular strap. Stuff everything in.
 - Tap your phone to pick a watch face, set the time, clear ghosting, or get ready for a firmware update, all without opening the case.
 - Run Claude Code, Codex or any AI coding agent, to assist you develop code or generate watch faces
+- Watch a demo - [https://www.youtube.com/watch?v=rnAYJC3mgms](https://www.youtube.com/watch?v=rnAYJC3mgms)
+- Build Guide (Hackster) - [https://www.hackster.io/varahan/graytimer-nfc-eink-watch-06e3d7](https://www.hackster.io/varahan/graytimer-nfc-eink-watch-06e3d7)
+- Medium (The story behind) - [https://medium.com/@haricane8133/gray-timer-the-story-4ba7ca0a75e1](https://www.hackster.io/varahan/graytimer-nfc-eink-watch-06e3d7)
 
 <table>
   <tr>
@@ -30,47 +33,9 @@
   </tr>
 </table>
 
-**[See all 116 watchfaces / Get NFC commands](docs/CATALOG.md)**
-
-[Photos of the finished watch](docs/GALLERY.md) · [How it was built](docs/BUILD.md)
-
----
-
-## Build your own
-
-### What you need
-
-- **MCU**: Seeed Xiao nRF52840
-- **Display**: GoodDisplay 1.54" e-paper (GDEY0154D67 / GDEH0154D67). Either the bare panel on a
-  GoodDisplay DESPI-C02 adapter, or a Waveshare 1.54" e-Paper Module with the panel already on it
-- **RTC**: RV-8803 (SmartElex module), with INT wired to D2 so it can wake the Xiao
-- **Battery**: LiPo 3.7V, 300-500mAh
-- **NFC antenna**: on the Xiao's NFC pads
-- **Case**: 3D print the main box and lid in [`/hardware`](hardware) ([print notes](docs/HARDWARE.md#case))
-
-**[Wiring, power and assembly →](docs/HARDWARE.md)**
-
-### Software
-
-1. **Install the Arduino IDE.**
-
-2. **Add the Seeed nRF52 boards**
-   - Preferences → Additional Board URLs
-   - Add: `https://files.seeedstudio.com/arduino/package_seeeduino_boards_index.json`
-   - Tools → Board → Boards Manager → search "Seeed nRF52" → Install
-
-3. **Install the libraries** (from the Library Manager)
-   - GxEPD2 by Jean-Marc Zingg
-   - Adafruit GFX Library
-   - SparkFun Qwiic RTC RV8803 Arduino Library
-   - Seeed's [XIAO_nRF52840_NFC](https://github.com/limengdu/XIAO_nRF52840_NFC)
-     (not in the Library Manager: Sketch → Include Library → Add .ZIP Library)
-
-4. **Upload** with the board *Seeed XIAO nRF52840*. The watch sleeps with USB off, so first
-   write `dfu` from your phone (or double-tap the reset button), then upload. On macOS the IDE
-   needs one small fix first: see [Programming](docs/HARDWARE.md#programming).
-
-**[Make your own watchface →](docs/API.md)**
+### Checkout
+- [All watchfaces / NFC usage](docs/CATALOG.md)
+- [Documentation / Build Guide](docs/README.md)
 
 ---
 
@@ -92,8 +57,6 @@ graytimer/
 ├── docs/                   # Catalog, gallery, hardware guide and API
 └── AGENTS.md               # A short guide for AI coding agents
 ```
-
-**[→ All the documentation](docs/README.md)**
 
 ---
 
