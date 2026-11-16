@@ -60,4 +60,19 @@ graytimer/
 
 ---
 
+## License
+
+Use it, change it, build and sell your own. Just credit Gray Timer and link back here.
+
+- **Code and tools** (the sketch and `watchfaceutils/`): [MIT](LICENSE).
+- **Case designs, photos and docs** (`hardware/`, `docs/`): [CC BY 4.0](https://creativecommons.org/licenses/by/4.0/).
+- **Not covered: art and fonts made by others.** Faces based on films, books, games and other
+  franchises, and the fonts in `myfonts/` converted from third-party typefaces, stay under their
+  owners' terms. Several are fan art or free for non-commercial use only; the notes in
+  `watchfaceutils/sources/` say where they came from.
+- **Libraries:** the firmware is built with GxEPD2, which is GPL-3.0. If you share a compiled
+  firmware file, GxEPD2's terms apply to it.
+
+---
+
 Thanks to @vu2ow for the help and inspiration behind all my projects!
